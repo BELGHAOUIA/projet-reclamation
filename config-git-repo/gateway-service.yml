@@ -1,26 +1,27 @@
 server:
   port: 8888
+
 spring:
   application:
     name: gateway-service
-    config:
-      uri: http://localhost:9999
-      fail-fast: true
   cloud:
     gateway:
       discovery:
         locator:
           enabled: true
+
       routes:
         - id: agent-service
-          uri: lb:http://AGENT-SERVICE
+          uri: lb://AGENT-SERVICE
           predicates:
             - Path=/api/v1/agent/**
+
         - id: ticket-service
-          uri: lb:http://TICKET-SERVICE
+          uri: lb://TICKET-SERVICE
           predicates:
             - Path=/api/v1/ticket/**
+
         - id: notification-service
-          uri: lb:http://NOTIFICATION-SERVICE
+          uri: lb://NOTIFICATION-SERVICE
           predicates:
             - Path=/api/v1/notification/**
