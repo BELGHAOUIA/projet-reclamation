@@ -1,6 +1,0 @@
-spring:
-  config:
-    import: optional:configserver:http://localhost:9999
-  application:
-    name: agent-service
-
