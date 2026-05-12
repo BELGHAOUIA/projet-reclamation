@@ -11,7 +11,6 @@ spring:
       discovery:
         locator:
           enabled: true
-
       routes:
         - id: agent-service
           uri: lb://AGENT-SERVICE
@@ -26,4 +25,4 @@ spring:
         - id: notification-service
           uri: lb://NOTIFICATION-SERVICE
           predicates:
-            - Path=/notification/**
+            - Path=/api/v1/notifications/**
