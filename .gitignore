@@ -1,41 +1,38 @@
-# Maven / Java
-**/target/
-*.class
-*.jar
-*.war
-*.ear
-*.log
+# Virtual Environments
+venv/
+venv_n/
+env/
+.env/
+ENV/
+*.task
+_mediapipe_models/
+trimmed_clips/
+EAR_csv_first/
+EAR_csv/
+patients/
+temoins/
+*.csv
+test/
+*.png
+*.h5
 
-# Maven wrapper
-.mvn/
 
-# IDEs
-.idea/
-*.iml
-.vscode/
-
-# Python
+# Python Cache
 __pycache__/
 *.py[cod]
-*.pyo
-*.pyd
-.venv/
-venv/
-env/
-*.env
+*$py.class
 
-# Databases
-*.sqlite3
-*.db
-
-# Build / output
-build/
-out/
+# Distribution / Packaging
 dist/
+build/
+*.egg-info/
 
-# OS files
+# PyCharm / VS Code settings
+.vscode/
+.idea/
+
+# OS generated files
 .DS_Store
 Thumbs.db
 
-# Other
-*.class
+dataset/
