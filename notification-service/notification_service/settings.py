@@ -3,7 +3,6 @@ import json
 import logging
 import urllib.request
 from pathlib import Path
-import py_eureka_client.eureka_client as eureka
 
 # 1. Configuration de base
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,25 +30,17 @@ SECRET_KEY = _cfg("django.secret_key", 'django-insecure-local-fallback')
 DEBUG = True
 ALLOWED_HOSTS = ['*']
 
-# Paramètres Métier
-GLOBAL_PARAM_P1 = int(_cfg("global.params.p1", 555))
-GLOBAL_PARAM_P2 = int(_cfg("global.params.p2", 777))
+# Paramètres extraits de la config distante
 NOTIFICATION_PORT = int(_cfg("notification-service.port", 8000))
+NOTIFICATION_BASE_URL = _cfg("notification-service.base-url", f"http://localhost:{NOTIFICATION_PORT}")
+DB_PASSWORD = _cfg("db.password", "")
 
 # 4. Enregistrement sur Eureka
 EUREKA_SERVER = _cfg("eureka.client.serviceUrl.defaultZone", "http://localhost:8761/eureka/")
+EUREKA_INSTANCE_HOST = _cfg("eureka.instance.hostname", "localhost")
+# Note: eureka.instance.port dans le fichier de config semble être 8761 (port du serveur), 
+# mais pour l'instance on utilise NOTIFICATION_PORT.
 
-async def init_eureka():
-    await eureka.init(
-        eureka_server=EUREKA_SERVER,
-        app_name=APP_NAME,
-        instance_port=NOTIFICATION_PORT,
-        instance_host=_cfg("eureka.instance.hostname", "localhost")
-    )
-
-# Appel de l'initialisation Eureka (pour Django, cela peut être mis dans apps.py)
-# import asyncio
-# asyncio.run(init_eureka())
 
 # 5. Reste de la configuration Django (inchangé)
 INSTALLED_APPS = [
@@ -60,8 +51,38 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'notifications',
+    'notifications.apps.NotificationsConfig',
 ]
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+ROOT_URLCONF = 'notification_service.urls'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = 'notification_service.wsgi.application'
 
 DATABASES = {
     'default': {
