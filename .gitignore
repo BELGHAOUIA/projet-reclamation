@@ -1,0 +1,41 @@
+# Maven / Java
+**/target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# Maven wrapper
+.mvn/
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+*.env
+
+# Databases
+*.sqlite3
+*.db
+
+# Build / output
+build/
+out/
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Other
+*.class
