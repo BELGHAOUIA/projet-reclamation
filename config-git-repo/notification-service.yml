@@ -1,6 +1,11 @@
 server:
   port: 8040
 spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
   data:
     mongodb:
       username: alibou
