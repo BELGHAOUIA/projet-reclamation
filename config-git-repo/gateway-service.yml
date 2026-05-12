@@ -26,3 +26,17 @@ spring:
           uri: lb://NOTIFICATION-SERVICE
           predicates:
             - Path=/api/v1/notifications/**
+        - id: weather-route
+          uri: https://api.openweathermap.org
+          predicates:
+              - Path=/weather/**
+
+          filters:
+              - AddRequestHeader=X-Source, gateway
+
+              - RewritePath=/weather/(?<segment>.*), /data/2.5/${segment}
+
+              - name: CircuitBreaker
+                args:
+                  name: weatherCB
+                  fallbackUri: forward:/fallback/weather
