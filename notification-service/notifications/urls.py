@@ -20,12 +20,13 @@ Templates (lecture seule — hardcodés dans templates.py) :
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import NotificationViewSet, TemplatesReadView
+from .views import NotificationViewSet, TemplatesReadView, config_check
 
 router = DefaultRouter()
 router.register(r'notifications', NotificationViewSet, basename='notification')
 
 urlpatterns = [
+    path('api/v1/config/', config_check, name='config_check'),
     path('api/v1/', include(router.urls)),
     # Templates en lecture seule
     path('api/v1/templates/', TemplatesReadView.as_view()),

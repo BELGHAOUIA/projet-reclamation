@@ -1,6 +1,11 @@
 server:
   port: 8888
 spring:
+  application:
+    name: gateway-service
+    config:
+      uri: http://localhost:9999
+      fail-fast: true
   cloud:
     gateway:
       discovery:

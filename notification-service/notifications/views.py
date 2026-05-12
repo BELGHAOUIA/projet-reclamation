@@ -27,6 +27,32 @@ from .templates import NOTIFICATION_TEMPLATES, render_template
 logger = logging.getLogger(__name__)
 
 
+from django.http import JsonResponse
+from django.conf import settings
+
+def config_check(request):
+    """
+    Vue de diagnostic pour vérifier l'origine des configurations.
+    Affiche les paramètres non sensibles.
+    """
+    config_data = {
+        "app_name": settings.APP_NAME,
+        "config_source": getattr(settings, "_config_source", "UNKNOWN"),
+        "config_server_url": settings.CONFIG_SERVER_URL,
+        "eureka": {
+            "server": settings.EUREKA_SERVER,
+            "instance_host": settings.EUREKA_INSTANCE_HOST,
+            "instance_port": settings.EUREKA_INSTANCE_PORT,
+        },
+        "notification_service": {
+            "port": settings.NOTIFICATION_PORT,
+            "base_url": settings.NOTIFICATION_BASE_URL,
+        },
+        "database_file": str(settings.DATABASES['default']['NAME']),
+        "email_user": settings.EMAIL_HOST_USER, # Visible pour debug, pas le mot de passe
+    }
+    return JsonResponse(config_data)
+
 def do_send(notification: Notification):
     """
     Envoie la notification selon son canal :

@@ -7,23 +7,34 @@ from pathlib import Path
 # 1. Configuration de base
 BASE_DIR = Path(__file__).resolve().parent.parent
 APP_NAME = "notification-service"
-CONFIG_SERVER_URL = f"http://localhost:9999/{APP_NAME}/default"
+CONFIG_SERVER_URL = os.getenv("CONFIG_SERVER_URL", f"http://localhost:9999/{APP_NAME}/default")
 
 _remote_config = {}
 
 # 2. Récupération de la configuration depuis Spring Cloud Config
+_config_source = "LOCAL (Fallback)"
 try:
     with urllib.request.urlopen(CONFIG_SERVER_URL, timeout=5) as resp:
         payload = json.loads(resp.read())
         # On parcourt les sources de propriétés (la première est la plus prioritaire)
         for source in reversed(payload.get("propertySources", [])):
             _remote_config.update(source.get("source", {}))
-    logging.info(f"[{APP_NAME}] Configuration chargée depuis le serveur.")
+    
+    if _remote_config:
+        _config_source = f"CONFIG SERVER ({CONFIG_SERVER_URL})"
+        print(f"✅ [{APP_NAME}] Configuration chargée avec succès depuis {CONFIG_SERVER_URL}")
+    else:
+        print(f"⚠️ [{APP_NAME}] Config Server joint mais aucune propriété trouvée pour {APP_NAME}")
+
 except Exception as e:
-    logging.warning(f"[{APP_NAME}] Config Server injoignable : {e}. Utilisation des valeurs par défaut.")
+    print(f"❌ [{APP_NAME}] Erreur Config Server : {e}. Utilisation des valeurs LOCALES.")
 
 def _cfg(key, default=None):
-    return _remote_config.get(key, default)
+    val = _remote_config.get(key)
+    if val is not None:
+        # On peut logguer ici si on veut tracer chaque clé
+        return val
+    return default
 
 # 3. Paramètres extraits
 SECRET_KEY = _cfg("django.secret_key", 'django-insecure-local-fallback')
@@ -38,9 +49,7 @@ DB_PASSWORD = _cfg("db.password", "")
 # 4. Enregistrement sur Eureka
 EUREKA_SERVER = _cfg("eureka.client.serviceUrl.defaultZone", "http://localhost:8761/eureka/")
 EUREKA_INSTANCE_HOST = _cfg("eureka.instance.hostname", "localhost")
-# Note: eureka.instance.port dans le fichier de config semble être 8761 (port du serveur), 
-# mais pour l'instance on utilise NOTIFICATION_PORT.
-
+EUREKA_INSTANCE_PORT = int(_cfg("eureka.instance.port", NOTIFICATION_PORT))
 
 # 5. Reste de la configuration Django (inchangé)
 INSTALLED_APPS = [
@@ -91,6 +100,10 @@ DATABASES = {
     }
 }
 
-# Vos paramètres Email (peuvent aussi être déplacés dans .properties)
-EMAIL_HOST_USER = 'boutheinabelg1@gmail.com'
-EMAIL_HOST_PASSWORD = 'cfnf myax xiub iykm'
+# Paramètres Statiques
+STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Paramètres Email (récupérés depuis le Config Server)
+EMAIL_HOST_USER = _cfg("spring.mail.username", "boutheinabelg1@gmail.com")
+EMAIL_HOST_PASSWORD = _cfg("spring.mail.password", "cfnf myax xiub iykm")
