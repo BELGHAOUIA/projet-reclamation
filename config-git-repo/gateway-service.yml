@@ -1,6 +1,8 @@
 server:
   port: 8888
-
+eureka:
+  instance:
+    prefer-ip-address: true
 spring:
   application:
     name: gateway-service
@@ -14,14 +16,14 @@ spring:
         - id: agent-service
           uri: lb://AGENT-SERVICE
           predicates:
-            - Path=/api/v1/agent/**
+            - Path=/agent/**
 
         - id: ticket-service
           uri: lb://TICKET-SERVICE
           predicates:
-            - Path=/api/v1/ticket/**
+            - Path=/ticket/**
 
         - id: notification-service
           uri: lb://NOTIFICATION-SERVICE
           predicates:
-            - Path=/api/v1/notification/**
+            - Path=/notification/**
