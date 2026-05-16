@@ -1,6 +1,8 @@
 package com.reclamation.ticket_service.Controller;
 
 import com.reclamation.ticket_service.Entity.TicketHistory;
+import com.reclamation.ticket_service.Enum.TicketCategory;
+import com.reclamation.ticket_service.Enum.TicketPriority;
 import com.reclamation.ticket_service.Repository.TicketHistoryRepository;
 import com.reclamation.ticket_service.Repository.TicketRepository;
 import com.reclamation.ticket_service.Entity.Ticket;
@@ -36,6 +38,30 @@ public class TicketController {
         return ResponseEntity.ok(ticketRepository.findAll());
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<List<Ticket>> getFilteredTickets(
+            @RequestParam(required = false) TicketCategory category,
+            @RequestParam(required = false) TicketPriority priority,
+            @RequestParam(required = false) TicketStatus status,
+            @RequestParam String userId) {
+
+        String queryClientId = null;
+        String queryAgentId = null;
+
+        if (!"ADMIN".equalsIgnoreCase(userId)) {
+            if (userId != null && userId.endsWith("user")) {
+                queryClientId = userId;
+            } else if (userId != null && userId.endsWith("agent")) {
+                queryAgentId = userId;
+            }
+        }
+        List<Ticket> tickets = ticketRepository.findByFilters(
+                category, priority, status, queryClientId, queryAgentId
+        );
+
+        return ResponseEntity.ok(tickets);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Ticket> getById(@PathVariable UUID id) {
         return ResponseEntity.of(ticketRepository.findById(id));
@@ -47,7 +73,7 @@ public class TicketController {
     }
 
     @PutMapping("/{id}/assign/{agentId}")
-    public ResponseEntity<Ticket> assignAgent(@PathVariable UUID id, @PathVariable UUID agentId) {
+    public ResponseEntity<Ticket> assignAgent(@PathVariable UUID id, @PathVariable String agentId) {
         Ticket ticket = ticketRepository.findById(id).orElseThrow();
         ticket.setAgentId(agentId);
         return ResponseEntity.ok(ticketRepository.save(ticket));

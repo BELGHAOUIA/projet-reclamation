@@ -24,7 +24,7 @@
           <camunda:inputOutput>
             <camunda:inputParameter name="url">http://localhost:8888/ticket</camunda:inputParameter>
             <camunda:inputParameter name="method">POST</camunda:inputParameter>
-            <camunda:inputParameter name="payload">${S("{}").prop("title", title).prop("description", description).prop("priority", priority).prop("category", category).prop("clientId", clientId).toString()}</camunda:inputParameter>
+            <camunda:inputParameter name="payload">${S("{}").prop("title", title).prop("description", description).prop("priority", priority).prop("category", category).prop("clientId", execution.getProcessEngineServices().getIdentityService().getCurrentAuthentication().getUserId()).toString()}</camunda:inputParameter>
             <camunda:inputParameter name="headers">
               <camunda:map>
                 <camunda:entry key="Content-Type">application/json</camunda:entry>

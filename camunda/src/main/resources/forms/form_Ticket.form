@@ -58,7 +58,7 @@
       }
     },
     {
-      "label": "Catecory",
+      "label": "Category",
       "values": [
         {
           "label": "Technical",
@@ -84,19 +84,6 @@
       },
       "id": "Field_17xd6pd",
       "key": "category",
-      "validate": {
-        "required": true
-      }
-    },
-    {
-      "label": "Client ID",
-      "type": "textfield",
-      "layout": {
-        "row": "Row_1fhj5ec",
-        "columns": null
-      },
-      "id": "Field_0oeh512",
-      "key": "clientId",
       "validate": {
         "required": true
       }

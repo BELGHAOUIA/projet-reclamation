@@ -1,0 +1,129 @@
+{
+  "components": [
+    {
+      "text": "View Tickets",
+      "type": "text",
+      "layout": {
+        "row": "Row_0z1s8u8",
+        "columns": null
+      },
+      "id": "Field_1mymno5"
+    },
+    {
+      "label": "Select ticket status",
+      "values": [
+        {
+          "label": "OPEN",
+          "value": "OPEN"
+        },
+        {
+          "label": "IN PROGRESS",
+          "value": "IN_PROGRESS"
+        },
+        {
+          "label": "RESOLVED",
+          "value": "RESOLVED"
+        },
+        {
+          "label": "ESCALATED",
+          "value": "ESCALATED"
+        },
+        {
+          "label": "CLOSED",
+          "value": "CLOSED"
+        }
+      ],
+      "type": "select",
+      "layout": {
+        "row": "Row_0z1s8u8",
+        "columns": 8
+      },
+      "id": "Field_0qlqnmw",
+      "key": "status",
+      "validate": {
+        "required": false
+      }
+    },
+    {
+      "label": "Select ticket priority",
+      "values": [
+        {
+          "label": "LOW",
+          "value": "LOW"
+        },
+        {
+          "label": "MEDIUM",
+          "value": "MEDIUM"
+        },
+        {
+          "label": "HIGH",
+          "value": "HIGH"
+        },
+        {
+          "label": "CRITICAL",
+          "value": "CRITICAL"
+        }
+      ],
+      "type": "select",
+      "layout": {
+        "row": "Row_0x9ljb3",
+        "columns": null
+      },
+      "id": "Field_0wjtibl",
+      "key": "priority",
+      "validate": {
+        "required": false
+      }
+    },
+    {
+      "label": "Select ticket category",
+      "values": [
+        {
+          "label": "BILLING",
+          "value": "BILLING"
+        },
+        {
+          "label": "TECHNICAL",
+          "value": "TECHNICAL"
+        },
+        {
+          "label": "DELIVERY",
+          "value": "DELIVERY"
+        },
+        {
+          "label": "OTHER",
+          "value": "OTHER"
+        }
+      ],
+      "type": "select",
+      "layout": {
+        "row": "Row_0x9ljb3",
+        "columns": null
+      },
+      "id": "Field_1o4uq5d",
+      "key": "category",
+      "validate": {
+        "required": false
+      }
+    },
+    {
+      "label": "Submit",
+      "action": "submit",
+      "type": "button",
+      "layout": {
+        "row": "Row_1bel8sw",
+        "columns": null
+      },
+      "id": "Field_1xaja6n"
+    }
+  ],
+  "type": "default",
+  "id": "Form_1emvp2d",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.45.0"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.24.0",
+  "schemaVersion": 19
+}
