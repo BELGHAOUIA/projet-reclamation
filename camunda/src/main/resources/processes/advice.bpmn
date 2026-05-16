@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1by0cko" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.45.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.24.0">
+  <bpmn:process id="advice" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1" name="jjjv" camunda:formRef="recruitment.form" camunda:formRefBinding="latest">
+      <bpmn:outgoing>Flow_1wvrore</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="Event_1s9h022">
+      <bpmn:incoming>Flow_0o86je3</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="Activity_1k0icm0" name="Check advice">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="advice_of_the_day" label="Advice of The Day" type="string" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0z98dbe</bpmn:incoming>
+      <bpmn:outgoing>Flow_0o86je3</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="Activity_0i2uys6" name="Call advice REST API">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="url">https://api.adviceslip.com/advice</camunda:inputParameter>
+            <camunda:inputParameter name="method">GET</camunda:inputParameter>
+            <camunda:outputParameter name="advice_of_the_day">${response}</camunda:outputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_08i19k2</bpmn:incoming>
+      <bpmn:outgoing>Flow_0z98dbe</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0z98dbe" sourceRef="Activity_0i2uys6" targetRef="Activity_1k0icm0" />
+    <bpmn:sequenceFlow id="Flow_0o86je3" sourceRef="Activity_1k0icm0" targetRef="Event_1s9h022" />
+    <bpmn:serviceTask id="Activity_0tctqiw" name="Save employee REST API">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="url">http://localhost:8080/rest/user/create</camunda:inputParameter>
+            <camunda:inputParameter name="method">POST</camunda:inputParameter>
+            <camunda:inputParameter name="payload">${'{ "profile": { "id": "'.concat(name.toLowerCase()).concat('", "firstName": "').concat(name).concat('", "lastName": "Employee", "email": "').concat(email).concat('" }, "credentials": { "password": "password123" } }')}</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Content-Type">application/json</camunda:entry>
+              </camunda:map>
+            </camunda:inputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1wvrore</bpmn:incoming>
+      <bpmn:outgoing>Flow_08i19k2</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_08i19k2" sourceRef="Activity_0tctqiw" targetRef="Activity_0i2uys6" />
+    <bpmn:sequenceFlow id="Flow_1wvrore" sourceRef="StartEvent_1" targetRef="Activity_0tctqiw" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="advice">
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="182" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="194" y="145" width="13" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1s9h022_di" bpmnElement="Event_1s9h022">
+        <dc:Bounds x="632" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1k0icm0_di" bpmnElement="Activity_1k0icm0">
+        <dc:Bounds x="500" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0i2uys6_di" bpmnElement="Activity_0i2uys6">
+        <dc:Bounds x="380" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1njuuz4" bpmnElement="Activity_0tctqiw">
+        <dc:Bounds x="250" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0z98dbe_di" bpmnElement="Flow_0z98dbe">
+        <di:waypoint x="480" y="120" />
+        <di:waypoint x="500" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0o86je3_di" bpmnElement="Flow_0o86je3">
+        <di:waypoint x="600" y="120" />
+        <di:waypoint x="632" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_08i19k2_di" bpmnElement="Flow_08i19k2">
+        <di:waypoint x="350" y="120" />
+        <di:waypoint x="380" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1wvrore_di" bpmnElement="Flow_1wvrore">
+        <di:waypoint x="218" y="120" />
+        <di:waypoint x="250" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

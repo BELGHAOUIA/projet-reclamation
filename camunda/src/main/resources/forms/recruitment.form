@@ -1,0 +1,53 @@
+{
+  "components": [
+    {
+      "text": "# Add Employee",
+      "type": "text",
+      "layout": {
+        "row": "Row_0oc9ys0",
+        "columns": null
+      },
+      "id": "Field_0kyybfn"
+    },
+    {
+      "label": "Name",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_0c7cqrw",
+        "columns": null
+      },
+      "id": "Field_13n583o",
+      "key": "name"
+    },
+    {
+      "label": "Email",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_0vv12fm",
+        "columns": null
+      },
+      "id": "Field_1haoyll",
+      "key": "email"
+    },
+    {
+      "label": "Job to Propose an Offer",
+      "values": [],
+      "type": "select",
+      "layout": {
+        "row": "Row_0agxbxf",
+        "columns": null
+      },
+      "id": "Field_0k0ll95",
+      "key": "list"
+    }
+  ],
+  "type": "default",
+  "id": "recruitment.form",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.45.0"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.24.0",
+  "schemaVersion": 19
+}
