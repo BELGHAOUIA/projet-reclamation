@@ -17,6 +17,11 @@ public class EmployeeController {
         return repository.save(employee);
     }
 
+    @GetMapping("/emplyee/{email}")
+    public boolean verifyEmployee(@PathVariable("email") String email) {
+        return repository.existsEmployeeByEmail(email);
+    }
+
     @GetMapping
     public Iterable<Employee> showEmployee() {
         return repository.findAll();

@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface EmployeeRepository extends CrudRepository<Employee, Long> {
-    // CrudRepository provides the .save() method automatically
+    boolean existsEmployeeByEmail(String email);
 }
