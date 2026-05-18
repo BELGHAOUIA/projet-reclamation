@@ -1,3 +1,6 @@
+admin:
+  email: belghaouiaamal@gmail.com
+
 eureka:
   instance:
     hostname: localhost
