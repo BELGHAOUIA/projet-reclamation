@@ -1,0 +1,43 @@
+{
+  "components": [
+    {
+      "text": "Assign agent",
+      "type": "text",
+      "layout": {
+        "row": "Row_1cye4ql",
+        "columns": null
+      },
+      "id": "Field_1yzqnby"
+    },
+    {
+      "label": "Select agent",
+      "type": "select",
+      "layout": {
+        "row": "Row_1cye4ql",
+        "columns": null
+      },
+      "id": "Field_1atabmy",
+      "key": "agentId",
+      "valuesKey": "agents"
+    },
+    {
+      "label": "Submit",
+      "action": "submit",
+      "type": "button",
+      "layout": {
+        "row": "Row_0vk5cxi",
+        "columns": null
+      },
+      "id": "Field_0zldydu"
+    }
+  ],
+  "type": "default",
+  "id": "Form_1tyui2m",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.45.0"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.24.0",
+  "schemaVersion": 19
+}

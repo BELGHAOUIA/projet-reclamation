@@ -74,13 +74,11 @@ public class TicketController {
 
         Optional<Ticket> ticket = ticketRepository.findById(ticketId);
 
-        // 2. Mettre à jour les champs si fournis
         if (status != null) ticket.get().setStatus(status);
         if (category != null) ticket.get().setCategory(category);
         if (priority != null) ticket.get().setPriority(priority);
         if (escalationLevel != null) ticket.get().setEscalationLevel(escalationLevel);
 
-        // 3. Sauvegarder les modifications
         Ticket updatedTicket = ticketRepository.save(ticket.get());
         return ResponseEntity.ok(updatedTicket);
     }
