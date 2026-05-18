@@ -41,7 +41,7 @@ def config_check(request):
         "config_server_url": settings.CONFIG_SERVER_URL,
         "eureka": {
             "server": settings.EUREKA_SERVER,
-            "instance_host": settings.EUREKA_INSTANCE_HOST,
+            "instance_host": settings.EUREKA_HOSTNAME,
             "instance_port": settings.EUREKA_INSTANCE_PORT,
         },
         "notification_service": {
