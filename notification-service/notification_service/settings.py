@@ -28,7 +28,7 @@ CONFIG_SERVER_URL = os.getenv(
 _remote_config = {}
 
 try:
-    print(f"🔄 Loading configuration from: {CONFIG_SERVER_URL}")
+    print(f"[config] Loading configuration from: {CONFIG_SERVER_URL}")
     
     with urllib.request.urlopen(CONFIG_SERVER_URL, timeout=10) as response:
         raw_data = response.read().decode("utf-8")
@@ -39,11 +39,11 @@ try:
         for source in reversed(property_sources):
             _remote_config.update(source.get("source", {}))
     
-    print("✅ Remote configuration loaded successfully")
+    print("[config] Remote configuration loaded successfully")
 
 except Exception as e:
-    print(f"⚠️  Config Server error: {e}")
-    print("   Using local fallback configuration")
+    print(f"[config] WARNING - Config Server error: {e}")
+    print("[config] Using local fallback configuration")
 
 # =========================================================
 # HELPER FUNCTION
@@ -341,27 +341,27 @@ LOGGING = {
 # =========================================================
 
 print("\n" + "="*60)
-print("📋 DJANGO CONFIGURATION SUMMARY")
+print("DJANGO CONFIGURATION SUMMARY")
 print("="*60)
 print(f"Application Name      : {APPLICATION_NAME}")
 print(f"Server Port           : {NOTIFICATION_PORT}")
 print(f"Base URL              : {NOTIFICATION_BASE_URL}")
 print()
-print("🎯 EUREKA CONFIGURATION (✅ CORRECTED):")
+print("EUREKA CONFIGURATION:")
 print(f"  Eureka Server       : {EUREKA_SERVER}")
 print(f"  Instance Hostname   : {EUREKA_HOSTNAME}")
-print(f"  Instance Port       : {EUREKA_INSTANCE_PORT}  ← ✅ NOW DEFINED!")
+print(f"  Instance Port       : {EUREKA_INSTANCE_PORT}")
 print(f"  Instance ID         : {EUREKA_INSTANCE_ID}")
 print(f"  Health Check URL    : {EUREKA_HEALTH_CHECK_URL}")
 print(f"  Discovery Enabled   : {DISCOVERY_ENABLED}")
 print()
-print("📧 EMAIL CONFIGURATION:")
+print("EMAIL CONFIGURATION:")
 print(f"  Host                : {EMAIL_HOST}")
 print(f"  Port                : {EMAIL_PORT}")
 print(f"  Username            : {EMAIL_HOST_USER}")
 print(f"  TLS Enabled         : {EMAIL_USE_TLS}")
 print()
-print("💾 DATABASE:")
+print("DATABASE:")
 print(f"  Engine              : {DATABASES['default']['ENGINE']}")
 print(f"  Name                : {DATABASES['default']['NAME']}")
 print()
