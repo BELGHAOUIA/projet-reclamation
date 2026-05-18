@@ -1,10 +1,10 @@
 {
   "components": [
     {
-      "text": "View Tickets",
+      "text": "Info",
       "type": "text",
       "layout": {
-        "row": "Row_0z1s8u8",
+        "row": "Row_1q41h9s",
         "columns": null
       },
       "id": "Field_1mymno5"
@@ -66,7 +66,7 @@
       ],
       "type": "select",
       "layout": {
-        "row": "Row_0x9ljb3",
+        "row": "Row_0z1s8u8",
         "columns": null
       },
       "id": "Field_0wjtibl",
@@ -105,6 +105,34 @@
       "validate": {
         "required": false
       }
+    },
+    {
+      "label": "Select escalation level",
+      "values": [
+        {
+          "label": "Level 0",
+          "value": "0"
+        },
+        {
+          "label": "Level 1",
+          "value": "2"
+        },
+        {
+          "label": "Level 2",
+          "value": "3"
+        },
+        {
+          "label": "Level 3",
+          "value": "value4"
+        }
+      ],
+      "type": "radio",
+      "layout": {
+        "row": "Row_0x9ljb3",
+        "columns": null
+      },
+      "id": "Field_1jn0bm3",
+      "key": "escalationLevel"
     },
     {
       "label": "Submit",

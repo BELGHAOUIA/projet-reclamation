@@ -20,11 +20,13 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID>, JpaSpecif
                 "(:category IS NULL OR t.category = :category) AND " +
                 "(:priority IS NULL OR t.priority = :priority) AND " +
                 "(:status IS NULL OR t.status = :status) AND " +
+                "(:escalationLevel IS NULL OR t.escalationLevel = :escalationLevel) AND " +
                 "(:clientId IS NULL OR t.clientId = :clientId) AND " +
                 "(:agentId IS NULL OR t.agentId = :agentId)")
         List<Ticket> findByFilters(@Param("category") TicketCategory category,
                                    @Param("priority") TicketPriority priority,
                                    @Param("status") TicketStatus status,
+                                   @Param("escalationLevel") Integer escalationLevel,
                                    @Param("clientId") String clientId,
                                    @Param("agentId") String agentId);
 }

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.awt.print.Pageable;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -43,6 +44,7 @@ public class TicketController {
             @RequestParam(required = false) TicketCategory category,
             @RequestParam(required = false) TicketPriority priority,
             @RequestParam(required = false) TicketStatus status,
+            @RequestParam(required = false) Integer escalationLevel,
             @RequestParam String userId) {
 
         String queryClientId = null;
@@ -56,10 +58,31 @@ public class TicketController {
             }
         }
         List<Ticket> tickets = ticketRepository.findByFilters(
-                category, priority, status, queryClientId, queryAgentId
+                category, priority, status,escalationLevel, queryClientId, queryAgentId
         );
 
         return ResponseEntity.ok(tickets);
+    }
+
+    @PutMapping()
+    public ResponseEntity<Ticket> updateTicket(
+            @RequestParam(required = false) TicketCategory category,
+            @RequestParam(required = false) TicketPriority priority,
+            @RequestParam(required = false) TicketStatus status,
+            @RequestParam(required = false) Integer escalationLevel,
+            @RequestParam UUID ticketId) {
+
+        Optional<Ticket> ticket = ticketRepository.findById(ticketId);
+
+        // 2. Mettre à jour les champs si fournis
+        if (status != null) ticket.get().setStatus(status);
+        if (category != null) ticket.get().setCategory(category);
+        if (priority != null) ticket.get().setPriority(priority);
+        if (escalationLevel != null) ticket.get().setEscalationLevel(escalationLevel);
+
+        // 3. Sauvegarder les modifications
+        Ticket updatedTicket = ticketRepository.save(ticket.get());
+        return ResponseEntity.ok(updatedTicket);
     }
 
     @GetMapping("/{id}")
