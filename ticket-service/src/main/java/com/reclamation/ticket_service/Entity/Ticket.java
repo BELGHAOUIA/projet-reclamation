@@ -39,8 +39,9 @@ public class Ticket {
     @Enumerated(EnumType.STRING)
     private TicketCategory category;
 
-    private UUID clientId;
-    private UUID agentId;
+    private String clientId;
+    private String clientEmail;
+    private String agentId;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

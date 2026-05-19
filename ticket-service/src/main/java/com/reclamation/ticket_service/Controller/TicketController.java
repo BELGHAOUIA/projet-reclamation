@@ -1,11 +1,14 @@
 package com.reclamation.ticket_service.Controller;
 
 import com.reclamation.ticket_service.Entity.TicketHistory;
+import com.reclamation.ticket_service.Enum.TicketCategory;
+import com.reclamation.ticket_service.Enum.TicketPriority;
 import com.reclamation.ticket_service.Repository.TicketHistoryRepository;
 import com.reclamation.ticket_service.Repository.TicketRepository;
 import com.reclamation.ticket_service.Entity.Ticket;
 import com.reclamation.ticket_service.Enum.TicketStatus;
 import com.reclamation.ticket_service.Service.TicketService;
+import com.reclamation.ticket_service.notification.NotificationClient;
 import jakarta.annotation.Priority;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.query.Page;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.awt.print.Pageable;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -24,16 +28,65 @@ public class TicketController {
     private final TicketRepository ticketRepository;
     private final TicketService ticketService;
     private final TicketHistoryRepository historyRepository;
+    private final NotificationClient notificationClient;
 
     @PostMapping
     public ResponseEntity<Ticket> create(@RequestBody Ticket ticket) {
         ticket.setStatus(TicketStatus.OPEN);
-        return ResponseEntity.ok(ticketRepository.save(ticket));
+        Ticket saved = ticketRepository.save(ticket);
+        String ticketId = saved.getId() != null ? saved.getId().toString() : null;
+        notificationClient.sendToAdmin("TICKET_CREATED", ticketId);
+        notificationClient.sendToClient(saved.getClientId(), "TICKET_CREATED", ticketId);
+        return ResponseEntity.ok(saved);
     }
 
     @GetMapping
     public ResponseEntity<List<Ticket>> getAll() {
         return ResponseEntity.ok(ticketRepository.findAll());
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<Ticket>> getFilteredTickets(
+            @RequestParam(required = false) TicketCategory category,
+            @RequestParam(required = false) TicketPriority priority,
+            @RequestParam(required = false) TicketStatus status,
+            @RequestParam(required = false) Integer escalationLevel,
+            @RequestParam String userId) {
+
+        String queryClientId = null;
+        String queryAgentId = null;
+
+        if (!"ADMIN".equalsIgnoreCase(userId)) {
+            if (userId != null && userId.endsWith("user")) {
+                queryClientId = userId;
+            } else if (userId != null && userId.endsWith("agent")) {
+                queryAgentId = userId;
+            }
+        }
+        List<Ticket> tickets = ticketRepository.findByFilters(
+                category, priority, status,escalationLevel, queryClientId, queryAgentId
+        );
+
+        return ResponseEntity.ok(tickets);
+    }
+
+    @PutMapping()
+    public ResponseEntity<Ticket> updateTicket(
+            @RequestParam(required = false) TicketCategory category,
+            @RequestParam(required = false) TicketPriority priority,
+            @RequestParam(required = false) TicketStatus status,
+            @RequestParam(required = false) Integer escalationLevel,
+            @RequestParam UUID ticketId) {
+
+        Optional<Ticket> ticket = ticketRepository.findById(ticketId);
+
+        if (status != null) ticket.get().setStatus(status);
+        if (category != null) ticket.get().setCategory(category);
+        if (priority != null) ticket.get().setPriority(priority);
+        if (escalationLevel != null) ticket.get().setEscalationLevel(escalationLevel);
+
+        Ticket updatedTicket = ticketRepository.save(ticket.get());
+        return ResponseEntity.ok(updatedTicket);
     }
 
     @GetMapping("/{id}")
@@ -47,10 +100,14 @@ public class TicketController {
     }
 
     @PutMapping("/{id}/assign/{agentId}")
-    public ResponseEntity<Ticket> assignAgent(@PathVariable UUID id, @PathVariable UUID agentId) {
+    public ResponseEntity<Ticket> assignAgent(@PathVariable UUID id, @PathVariable String agentId) {
         Ticket ticket = ticketRepository.findById(id).orElseThrow();
         ticket.setAgentId(agentId);
-        return ResponseEntity.ok(ticketRepository.save(ticket));
+        Ticket saved = ticketRepository.save(ticket);
+        String ticketId = id.toString();
+        notificationClient.sendToAdmin("TICKET_ASSIGNED", ticketId);
+        notificationClient.sendToAgent(agentId, "TICKET_ASSIGNED", ticketId);
+        return ResponseEntity.ok(saved);
     }
 
     @PostMapping("/{id}/escalate")

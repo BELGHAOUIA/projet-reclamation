@@ -1,8 +1,8 @@
+import hashlib
 import logging
 from uuid import UUID
 
 from django.conf import settings as django_settings
-from django.core.mail import send_mail
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import action
@@ -41,7 +41,7 @@ def config_check(request):
         "config_server_url": settings.CONFIG_SERVER_URL,
         "eureka": {
             "server": settings.EUREKA_SERVER,
-            "instance_host": settings.EUREKA_INSTANCE_HOST,
+            "instance_host": settings.EUREKA_HOSTNAME,
             "instance_port": settings.EUREKA_INSTANCE_PORT,
         },
         "notification_service": {
@@ -53,67 +53,34 @@ def config_check(request):
     }
     return JsonResponse(config_data)
 
+# ---------------------------------------------------------------------------
+# Helpers UUID — même algorithme que UUID.nameUUIDFromBytes() en Java
+# ---------------------------------------------------------------------------
+
+def _java_name_uuid(text: str) -> UUID:
+    """
+    Reproduit UUID.nameUUIDFromBytes(text.encode('utf-8')) de Java.
+    MD5 brut sans namespace, variante IETF, version 3.
+    """
+    raw = hashlib.md5(text.encode('utf-8')).digest()
+    b   = bytearray(raw)
+    b[6] = (b[6] & 0x0f) | 0x30   # version 3
+    b[8] = (b[8] & 0x3f) | 0x80   # IETF variant
+    return UUID(bytes=bytes(b))
+
+ADMIN_RECIPIENT_ID = UUID('00000000-0000-0000-0000-000000000001')
+
+
 def do_send(notification: Notification):
     """
-    Envoie la notification selon son canal :
-      - EMAIL  → vrai envoi SMTP via django.core.mail
-      - SMS    → simulation console (log)
-      - IN_APP → simulation console (log)
-
-    Retourne :
-        (True,  None)      → succès
-        (False, str_error) → échec
+    Notification IN_APP : la notification est persistée en base.
+    Aucun envoi externe (email/SMS) — le canal IN_APP suffit.
     """
-    channel = notification.channel
-
-    # ── EMAIL ───────────────────────────────────────────────────────────
-    if channel == 'EMAIL':
-        try:
-            send_mail(
-                subject=notification.subject,
-                message=notification.content,
-                from_email=django_settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[notification.recipient_email],
-                fail_silently=False,
-            )
-            logger.info(
-                "Email envoyé — id=%s  destinataire=%s",
-                notification.id,
-                notification.recipient_email,
-            )
-            return True, None
-        except Exception as exc:
-            logger.error("Erreur envoi email — id=%s : %s", notification.id, exc)
-            return False, str(exc)
-
-    # ── SMS / IN_APP : simulation console ───────────────────────────────
-    try:
-        separator = "=" * 62
-        log_block = (
-            f"\n{separator}\n"
-            f"  [NOTIFICATION SERVICE] ENVOI SIMULÉ ({channel})\n"
-            f"  ID          : {notification.id}\n"
-            f"  Type        : {notification.type}\n"
-            f"  Canal       : {channel}\n"
-            f"  Destinataire: {notification.recipient_email} "
-            f"({notification.recipient_type})\n"
-            f"  Sujet       : {notification.subject}\n"
-            f"  Contenu     : {notification.content[:100]}"
-            f"{'...' if len(notification.content) > 100 else ''}\n"
-            f"{separator}"
-        )
-        print(log_block)
-        logger.info(
-            "Notification simulée (%s) — id=%s  email=%s",
-            channel,
-            notification.id,
-            notification.recipient_email,
-        )
-        return True, None
-
-    except Exception as exc:
-        logger.error("Erreur inattendue lors de do_send (%s) : %s", channel, exc)
-        return False, str(exc)
+    logger.info(
+        "Notification IN_APP enregistrée — id=%s  type=%s  destinataire_id=%s",
+        notification.id, notification.type, notification.recipient_id,
+    )
+    return True, None
 
 class NotificationViewSet(
     ListModelMixin,
@@ -212,9 +179,8 @@ class NotificationViewSet(
 
         ticket_id_val = validated.get('ticket_id')
         context = {
-            'ticket_id':       str(ticket_id_val) if ticket_id_val else 'N/A',
-            'recipient_name':  recipient_name or validated.get('recipient_email', ''),
-            'recipient_email': validated.get('recipient_email', ''),
+            'ticket_id':      str(ticket_id_val) if ticket_id_val else 'N/A',
+            'recipient_name': recipient_name or str(validated.get('recipient_id', '')),
         }
 
         # Récupérer + remplir le template
@@ -371,6 +337,50 @@ class NotificationViewSet(
         if page is not None:
             serializer = NotificationSummarySerializer(page, many=True)
             return self.get_paginated_response(serializer.data)
+
+        serializer = NotificationSummarySerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    # ------------------------------------------------------------------
+    # GET /api/v1/notifications/user/{userId}/?userType=CLIENT|AGENT|ADMIN
+    # ------------------------------------------------------------------
+
+    @action(
+        detail=False,
+        methods=['get'],
+        url_path=r'user/(?P<user_id>[^/.]+)',
+    )
+    def by_user(self, request, user_id=None):
+        """
+        Retourne les notifications du user connecté sur Camunda.
+        Convertit l'ID Camunda (string) en recipient_id UUID
+        selon la même logique que les services Java.
+
+        URL  : GET /api/v1/notifications/user/{userId}/?userType=CLIENT|AGENT|ADMIN
+        Tri  : createdAt DESC — paginé.
+
+        Conversion :
+          ADMIN  → UUID fixe 00000000-0000-0000-0000-000000000001
+          CLIENT → nameUUID("client:{userId}")
+          AGENT  → nameUUID("agent:{userId}")
+        """
+        user_type = request.query_params.get('userType', '').upper()
+        if user_type not in ('CLIENT', 'AGENT', 'ADMIN'):
+            return Response(
+                {'error': 'userType invalide : CLIENT | AGENT | ADMIN attendu.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if user_type == 'ADMIN':
+            recipient_uuid = ADMIN_RECIPIENT_ID
+        elif user_type == 'CLIENT':
+            recipient_uuid = _java_name_uuid('client:' + user_id)
+        else:  # AGENT
+            recipient_uuid = _java_name_uuid('agent:' + user_id)
+
+        queryset = Notification.objects.filter(
+            recipient_id=recipient_uuid
+        ).order_by('-created_at')
 
         serializer = NotificationSummarySerializer(queryset, many=True)
         return Response(serializer.data)

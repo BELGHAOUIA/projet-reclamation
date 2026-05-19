@@ -6,6 +6,9 @@ import com.iset.Agent.entity.AgentAssignment;
 import com.iset.Agent.enums.AgentLevel;
 import com.iset.Agent.enums.AgentSpecialty;
 import com.iset.Agent.enums.AgentStatus;
+import com.iset.Agent.notification.NotificationClient;
+import com.iset.Agent.notification.TicketClient;
+import com.iset.Agent.notification.TicketDTO;
 import com.iset.Agent.repository.AgentAssignmentRepository;
 import com.iset.Agent.repository.AgentRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -22,6 +25,8 @@ public class AgentService {
 
     private final AgentRepository agentRepository;
     private final AgentAssignmentRepository assignmentRepository;
+    private final NotificationClient notificationClient;
+    private final TicketClient ticketClient;
 
     // ── CRUD ──────────────────────────────────────────────
 
@@ -176,7 +181,10 @@ public class AgentService {
                 .build();
         AgentAssignment saved = assignmentRepository.save(assignment);
 
-        return toAssignmentDTO(saved, selected);
+        AssignmentResponseDTO response = toAssignmentDTO(saved, selected);
+        notificationClient.sendToAdmin("TICKET_ASSIGNED", ticketId);
+        notificationClient.sendToAgent(selected.getId(), "TICKET_ASSIGNED", ticketId);
+        return response;
     }
 
     @Transactional
@@ -203,7 +211,47 @@ public class AgentService {
         return toAssignmentDTO(assignment, assignment.getAgent());
     }
 
-    // ── HELPERS ───────────────────────────────────────────
+    // ── GESTION STATUT TICKET ─────────────────────────────
+
+    @Transactional
+    public void resolveTicket(String ticketId) {
+        // Utilise getAssignmentByTicket (méthode existante) pour récupérer l'affectation et l'email agent
+        AssignmentResponseDTO assignment = null;
+        try { assignment = getAssignmentByTicket(ticketId); } catch (EntityNotFoundException ignored) {}
+
+        ticketClient.updateStatus(ticketId, "RESOLVED");
+        // Utilise releaseAgent (méthode existante) pour libérer l'agent
+        if (assignment != null) {
+            releaseAgent(ticketId);
+        }
+
+        notificationClient.sendToAdmin("TICKET_RESOLVED", ticketId);
+        TicketDTO ticket = ticketClient.getTicket(ticketId);
+        if (ticket != null) {
+            notificationClient.sendToClient(ticket.getClientId(), "TICKET_RESOLVED", ticketId);
+        }
+        if (assignment != null) {
+            notificationClient.sendToAgent(assignment.getAgentId(), "TICKET_RESOLVED", ticketId);
+        }
+    }
+
+    @Transactional
+    public void escalateTicket(String ticketId) {
+        ticketClient.escalate(ticketId);
+
+        notificationClient.sendToAdmin("TICKET_ESCALATED", ticketId);
+        TicketDTO ticket = ticketClient.getTicket(ticketId);
+        if (ticket != null) {
+            notificationClient.sendToClient(ticket.getClientId(), "TICKET_ESCALATED", ticketId);
+        }
+    }
+
+    public void updateTicket(String ticketId, String status) {
+        if (status != null && !status.isBlank()) {
+            ticketClient.updateStatus(ticketId, status);
+        }
+        notificationClient.sendToAdmin("TICKET_UPDATED", ticketId);
+    }
 
     private Agent findAgent(String id) {
         return agentRepository.findById(id)

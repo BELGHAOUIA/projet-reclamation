@@ -78,4 +78,25 @@ public class AgentController {
     public ResponseEntity<AssignmentResponseDTO> getAssignment(@PathVariable String ticketId) {
         return ResponseEntity.ok(agentService.getAssignmentByTicket(ticketId));
     }
+
+    // ── GESTION STATUT TICKET ─────────────────────────────
+
+    @PostMapping("/ticket/{ticketId}/resolve")
+    public ResponseEntity<Void> resolveTicket(@PathVariable String ticketId) {
+        agentService.resolveTicket(ticketId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/ticket/{ticketId}/escalate")
+    public ResponseEntity<Void> escalateTicket(@PathVariable String ticketId) {
+        agentService.escalateTicket(ticketId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/ticket/{ticketId}")
+    public ResponseEntity<Void> updateTicket(@PathVariable String ticketId,
+                                              @RequestParam(required = false) String status) {
+        agentService.updateTicket(ticketId, status);
+        return ResponseEntity.ok().build();
+    }
 }

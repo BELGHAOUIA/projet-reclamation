@@ -1,0 +1,111 @@
+{
+  "components": [
+    {
+      "label": "Title",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_0o9hzl8",
+        "columns": null
+      },
+      "id": "Field_12etfq8",
+      "key": "title",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Description",
+      "type": "textarea",
+      "layout": {
+        "row": "Row_1b6jgyb",
+        "columns": null
+      },
+      "id": "Field_12ytmfk",
+      "key": "description",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Priority",
+      "values": [
+        {
+          "label": "Low",
+          "value": "LOW"
+        },
+        {
+          "label": "Medium",
+          "value": "MEDIUM"
+        },
+        {
+          "label": "High",
+          "value": "HIGH"
+        },
+        {
+          "label": "Critical",
+          "value": "CRITICAL"
+        }
+      ],
+      "type": "select",
+      "layout": {
+        "row": "Row_0vipiik",
+        "columns": null
+      },
+      "id": "Field_0meyx61",
+      "key": "priority",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Category",
+      "values": [
+        {
+          "label": "Technical",
+          "value": "TECHNICAL"
+        },
+        {
+          "label": "Billing",
+          "value": "BILLING"
+        },
+        {
+          "label": "Delivery",
+          "value": "DELIVERY"
+        },
+        {
+          "label": "Other",
+          "value": "OTHER"
+        }
+      ],
+      "type": "select",
+      "layout": {
+        "row": "Row_0pejo14",
+        "columns": null
+      },
+      "id": "Field_17xd6pd",
+      "key": "category",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Submit",
+      "action": "submit",
+      "type": "button",
+      "layout": {
+        "row": "Row_1jj6nps",
+        "columns": 3
+      },
+      "id": "Field_1p9rcnj"
+    }
+  ],
+  "type": "default",
+  "id": "form_Ticket.form",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.45.0"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.24.0",
+  "schemaVersion": 19
+}

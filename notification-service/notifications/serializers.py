@@ -62,10 +62,15 @@ class NotificationCreateSerializer(serializers.ModelSerializer):
     """
     recipientId    = serializers.UUIDField(source='recipient_id')
     recipientType  = serializers.ChoiceField(
-        choices=['CLIENT', 'AGENT'],
+        choices=['CLIENT', 'AGENT', 'ADMIN'],
         source='recipient_type',
     )
-    recipientEmail = serializers.EmailField(source='recipient_email')
+    recipientEmail = serializers.CharField(
+        source='recipient_email',
+        required=False,
+        allow_blank=True,
+        default='',
+    )
     ticketId       = serializers.UUIDField(
         source='ticket_id',
         required=False,

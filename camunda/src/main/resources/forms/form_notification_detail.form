@@ -1,0 +1,68 @@
+{
+  "components": [
+    {
+      "label": "Type",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_type",
+        "columns": 8
+      },
+      "id": "Field_detail_type",
+      "key": "notifType",
+      "readonly": true
+    },
+    {
+      "label": "Statut",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_type",
+        "columns": 8
+      },
+      "id": "Field_detail_status",
+      "key": "notifStatus",
+      "readonly": true
+    },
+    {
+      "label": "Sujet",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_subject",
+        "columns": null
+      },
+      "id": "Field_detail_subject",
+      "key": "notifSubject",
+      "readonly": true
+    },
+    {
+      "label": "Contenu",
+      "type": "textarea",
+      "layout": {
+        "row": "Row_content",
+        "columns": null
+      },
+      "id": "Field_detail_content",
+      "key": "notifContent",
+      "readonly": true
+    },
+    {
+      "label": "Créé le",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_dates",
+        "columns": 8
+      },
+      "id": "Field_detail_created",
+      "key": "notifCreatedAt",
+      "readonly": true
+    }
+  ],
+  "type": "default",
+  "id": "form_notification_detail.form",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.45.0"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.24.0",
+  "schemaVersion": 19
+}

@@ -1,0 +1,55 @@
+{
+  "components": [
+    {
+      "text": "My Tickets",
+      "type": "text",
+      "layout": {
+        "row": "Row_07hgthd",
+        "columns": null
+      },
+      "id": "Field_08aflko"
+    },
+    {
+      "type": "table",
+      "layout": {
+        "row": "Row_08qv1o9",
+        "columns": null
+      },
+      "label": "Tickets",
+      "dataSource": "=ticketList",
+      "rowCount": 10,
+      "id": "Field_1pux5uy",
+      "columns": [
+        {
+          "label": "Title",
+          "key": "title"
+        },
+        {
+          "label": "Description",
+          "key": "description"
+        },
+        {
+          "label": "Priority",
+          "key": "priority"
+        },
+        {
+          "label": "Status",
+          "key": "status"
+        },
+        {
+          "label": "Category",
+          "key": "category"
+        }
+      ]
+    }
+  ],
+  "type": "default",
+  "id": "Form_0mcyyx5",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.45.0"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.24.0",
+  "schemaVersion": 19
+}

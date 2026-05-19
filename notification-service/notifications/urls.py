@@ -4,13 +4,14 @@ URLs du Notification Service.
 Toutes les routes sont montées sous /api/v1/.
 
 Notifications :
-    POST   /api/v1/notifications/send/                     → envoyer
-    GET    /api/v1/notifications/                          → lister (filtres: status, type, recipientId)
-    GET    /api/v1/notifications/{id}/                     → détail
-    PATCH  /api/v1/notifications/{id}/read/                → marquer comme lue
-    POST   /api/v1/notifications/{id}/retry/               → réessayer si FAILED
-    GET    /api/v1/notifications/recipient/{recipientId}/  → notifs d'un destinataire
-    DELETE /api/v1/notifications/{id}/                     → supprimer
+    POST   /api/v1/notifications/send/                              → envoyer
+    GET    /api/v1/notifications/                                   → lister (filtres: status, type, recipientId)
+    GET    /api/v1/notifications/{id}/                              → détail
+    PATCH  /api/v1/notifications/{id}/read/                         → marquer comme lue
+    POST   /api/v1/notifications/{id}/retry/                        → réessayer si FAILED
+    GET    /api/v1/notifications/recipient/{recipientId}/           → notifs d'un destinataire (UUID)
+    GET    /api/v1/notifications/user/{userId}/?userType=...        → notifs du user connecté (ID Camunda)
+    DELETE /api/v1/notifications/{id}/                              → supprimer
 
 Templates (lecture seule — hardcodés dans templates.py) :
     GET    /api/v1/templates/                              → lister les 15 templates

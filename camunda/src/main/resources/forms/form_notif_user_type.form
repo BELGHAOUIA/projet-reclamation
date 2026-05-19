@@ -1,0 +1,63 @@
+{
+  "components": [
+    {
+      "label": "ID de l'utilisateur (recipient_id)",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_userid",
+        "columns": null
+      },
+      "id": "Field_notif_userid",
+      "key": "userId",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Type d'utilisateur",
+      "values": [
+        {
+          "label": "Administrateur",
+          "value": "ADMIN"
+        },
+        {
+          "label": "Agent",
+          "value": "AGENT"
+        },
+        {
+          "label": "Client",
+          "value": "CLIENT"
+        }
+      ],
+      "type": "select",
+      "layout": {
+        "row": "Row_usertype",
+        "columns": null
+      },
+      "id": "Field_notif_usertype",
+      "key": "userType",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Rechercher",
+      "action": "submit",
+      "type": "button",
+      "layout": {
+        "row": "Row_submit",
+        "columns": 3
+      },
+      "id": "Field_notif_submit"
+    }
+  ],
+  "type": "default",
+  "id": "form_notif_user_type.form",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.45.0"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.24.0",
+  "schemaVersion": 19
+}

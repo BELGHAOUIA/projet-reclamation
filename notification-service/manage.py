@@ -15,7 +15,20 @@ def main():
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
-    execute_from_command_line(sys.argv)
+
+    args = list(sys.argv)
+
+    # When 'runserver' is called without an explicit address:port,
+    # automatically use the port defined in NOTIFICATION_PORT (from config server).
+    if len(args) >= 2 and args[1] == 'runserver' and len(args) == 2:
+        try:
+            from django.conf import settings
+            port = getattr(settings, 'NOTIFICATION_PORT', 8083)
+            args.append(f'0.0.0.0:{port}')
+        except Exception:
+            args.append('0.0.0.0:8083')  # hard fallback
+
+    execute_from_command_line(args)
 
 
 if __name__ == '__main__':

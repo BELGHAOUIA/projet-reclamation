@@ -7,6 +7,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="camunda" />
         <module name="Agent" />
         <module name="config-service" />
         <module name="discovery" />
@@ -22,6 +23,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="Agent" options="-parameters" />
+      <module name="camunda" options="-parameters" />
       <module name="config-service" options="-parameters" />
       <module name="discovery" options="-parameters" />
       <module name="eureka-service" options="-parameters" />

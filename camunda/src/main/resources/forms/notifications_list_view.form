@@ -1,0 +1,34 @@
+{
+  "components": [
+    {
+      "text": "Mes Notifications",
+      "type": "text",
+      "layout": {
+        "row": "Row_header",
+        "columns": null
+      },
+      "id": "Field_notiflist_header"
+    },
+    {
+      "label": "Notifications",
+      "type": "textarea",
+      "layout": {
+        "row": "Row_table",
+        "columns": null
+      },
+      "id": "Field_notiflist_table",
+      "key": "notificationList",
+      "readonly": true,
+      "rows": 20
+    }
+  ],
+  "type": "default",
+  "id": "notifications_list_view.form",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.45.0"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.24.0",
+  "schemaVersion": 19
+}

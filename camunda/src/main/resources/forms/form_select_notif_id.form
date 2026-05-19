@@ -1,0 +1,36 @@
+{
+  "components": [
+    {
+      "label": "ID de la notification (UUID)",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_id",
+        "columns": null
+      },
+      "id": "Field_notifid_input",
+      "key": "notificationId",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Valider",
+      "action": "submit",
+      "type": "button",
+      "layout": {
+        "row": "Row_submit",
+        "columns": 3
+      },
+      "id": "Field_notifid_submit"
+    }
+  ],
+  "type": "default",
+  "id": "form_select_notif_id.form",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.45.0"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.24.0",
+  "schemaVersion": 19
+}
