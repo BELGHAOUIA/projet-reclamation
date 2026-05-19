@@ -1,0 +1,178 @@
+{
+  "components": [
+    {
+      "label": "First Name",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_1csryxk",
+        "columns": null
+      },
+      "id": "Field_0gf6dkj",
+      "key": "firstName",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Last Name",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_17wbb0z",
+        "columns": null
+      },
+      "id": "Field_0xdd0t3",
+      "key": "lastName",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Email",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_04dal9f",
+        "columns": null
+      },
+      "id": "Field_1ya060s",
+      "key": "email",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Phone",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_1gao5z7",
+        "columns": null
+      },
+      "id": "Field_03flx41",
+      "key": "phone",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Specialty",
+      "values": [
+        {
+          "label": "TECHNICAL",
+          "value": "TECHNICAL"
+        },
+        {
+          "label": "BILLING",
+          "value": "BILLING"
+        },
+        {
+          "label": "GENERAL",
+          "value": "GENERAL"
+        },
+        {
+          "label": "SHIPPING",
+          "value": "SHIPPING"
+        },
+        {
+          "label": "RETURNS",
+          "value": "RETURNS"
+        }
+      ],
+      "type": "select",
+      "layout": {
+        "row": "Row_1h68mrh",
+        "columns": null
+      },
+      "id": "Field_0zig4vb",
+      "key": "specialty",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Level",
+      "values": [
+        {
+          "label": "JUNIOR",
+          "value": "JUNIOR"
+        },
+        {
+          "label": "SENIOR",
+          "value": "SENIOR"
+        },
+        {
+          "label": "EXPERT",
+          "value": "EXPERT"
+        },
+        {
+          "label": "MANAGER",
+          "value": "MANAGER"
+        }
+      ],
+      "type": "select",
+      "layout": {
+        "row": "Row_08xgwng",
+        "columns": null
+      },
+      "id": "Field_0q1vy9v",
+      "key": "level",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Department",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_0qqywzr",
+        "columns": null
+      },
+      "id": "Field_00umt2n",
+      "key": "department",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Max Tickets",
+      "type": "number",
+      "layout": {
+        "row": "Row_021dll2",
+        "columns": null
+      },
+      "id": "Field_15cqw24",
+      "key": "maxTickets",
+      "validate": {
+        "required": true,
+        "min": "1",
+        "max": "5"
+      }
+    },
+    {
+      "content": "{{#if messageErreurServeur}}\n  <div style=\"color: red; font-weight: bold; background-color: #fde8e8; padding: 10px; border-radius: 5px; margin-bottom: 15px;\">\n    ⚠️ Erreur de validation backend : {{ messageErreurServeur }}\n  </div>\n{{/if}}",
+      "type": "html",
+      "layout": {
+        "row": "Row_0tvt3xl",
+        "columns": null
+      },
+      "id": "Field_0xn44n1"
+    },
+    {
+      "label": "Submit",
+      "action": "submit",
+      "type": "button",
+      "layout": {
+        "row": "Row_1ppcuj3",
+        "columns": null
+      },
+      "id": "Field_15iwcqc"
+    }
+  ],
+  "type": "default",
+  "id": "Form_0qe67te",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.45.0"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.24.0",
+  "schemaVersion": 19
+}

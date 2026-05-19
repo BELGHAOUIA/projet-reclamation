@@ -77,10 +77,18 @@ public class AgentService {
 
         validateAgent(dto);
 
+        // 1. On nettoie l'email : on garde uniquement les lettres et les chiffres [^a-zA-Z0-9]
+        // 2. On passe tout en minuscules pour éviter les surprises
+        String cleanEmail = dto.getEmail().replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+
+        // 3. On combine l'email propre et le mot "agent" (sans tiret)
+        String customId = cleanEmail + "agent";
+
         Agent agent = Agent.builder()
+                .id(customId)
                 .firstName(dto.getFirstName())
                 .lastName(dto.getLastName())
-                .email(dto.getEmail())
+                .email(dto.getEmail()) // L'email stocké dans la table reste normal (ex: mohamed.benali@gmail.com)
                 .phone(dto.getPhone())
                 .specialty(dto.getSpecialty())
                 .level(dto.getLevel())
