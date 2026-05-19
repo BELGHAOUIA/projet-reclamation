@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:modeler="http://camunda.org/schema/modeler/1.0"
+                  id="Definitions_notif_read"
+                  targetNamespace="http://bpmn.io/schema/bpmn"
+                  exporter="Camunda Modeler"
+                  exporterVersion="5.45.0"
+                  modeler:executionPlatform="Camunda Platform"
+                  modeler:executionPlatformVersion="7.24.0">
+
+  <bpmn:process id="Process_MarkNotificationRead" name="Marquer comme lu" isExecutable="true">
+
+    <!-- Start : saisir l'ID de la notification -->
+    <bpmn:startEvent id="Start_rd" name="Marquer comme lu"
+                     camunda:formRef="form_select_notif_id.form"
+                     camunda:formRefBinding="latest">
+      <bpmn:outgoing>Flow_rd_start</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <!-- Service task : PATCH /api/v1/notifications/{notificationId}/read/ -->
+    <bpmn:serviceTask id="Task_rd_patch" name="Marquer la notification comme lue">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="url">http://localhost:8888/api/v1/notifications/${notificationId}/read/</camunda:inputParameter>
+            <camunda:inputParameter name="method">PATCH</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Content-Type">application/json</camunda:entry>
+              </camunda:map>
+            </camunda:inputParameter>
+            <camunda:outputParameter name="statusCode">${statusCode}</camunda:outputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_rd_start</bpmn:incoming>
+      <bpmn:outgoing>Flow_rd_togw</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <!-- Boundary error (service down) -->
+    <bpmn:boundaryEvent id="Boundary_rd_err" attachedToRef="Task_rd_patch">
+      <bpmn:outgoing>Flow_rd_svcerr</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrDef_rd" />
+    </bpmn:boundaryEvent>
+
+    <!-- Gateway -->
+    <bpmn:exclusiveGateway id="GW_rd">
+      <bpmn:incoming>Flow_rd_togw</bpmn:incoming>
+      <bpmn:outgoing>Flow_rd_ok</bpmn:outgoing>
+      <bpmn:outgoing>Flow_rd_ko</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <!-- User task succès -->
+    <bpmn:userTask id="Task_rd_ok" name="Notification marquée comme lue">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="response" label="Résultat" type="string"
+                             defaultValue="La notification a été marquée comme lue." />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_rd_ok</bpmn:incoming>
+      <bpmn:outgoing>Flow_rd_end_ok</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <!-- User task erreur HTTP (404 / déjà lue) -->
+    <bpmn:userTask id="Task_rd_httperr" name="Notification introuvable ou déjà lue">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="response" label="Résultat" type="string"
+                             defaultValue="Notification introuvable ou déjà marquée comme lue. Vérifiez l'ID saisi." />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_rd_ko</bpmn:incoming>
+      <bpmn:outgoing>Flow_rd_end_ko</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <!-- User task erreur service -->
+    <bpmn:userTask id="Task_rd_svcerr" name="Service indisponible">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="response" label="Résultat" type="string"
+                             defaultValue="Le service de notification est indisponible." />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_rd_svcerr</bpmn:incoming>
+      <bpmn:outgoing>Flow_rd_end_svc</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <!-- End -->
+    <bpmn:endEvent id="End_rd">
+      <bpmn:incoming>Flow_rd_end_ok</bpmn:incoming>
+      <bpmn:incoming>Flow_rd_end_ko</bpmn:incoming>
+      <bpmn:incoming>Flow_rd_end_svc</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <!-- Flows -->
+    <bpmn:sequenceFlow id="Flow_rd_start"   sourceRef="Start_rd"        targetRef="Task_rd_patch" />
+    <bpmn:sequenceFlow id="Flow_rd_togw"    sourceRef="Task_rd_patch"   targetRef="GW_rd" />
+    <bpmn:sequenceFlow id="Flow_rd_ok"      name="succès" sourceRef="GW_rd" targetRef="Task_rd_ok">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${statusCode == 200}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_rd_ko"      name="erreur" sourceRef="GW_rd" targetRef="Task_rd_httperr">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${statusCode != 200}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_rd_svcerr"  name="service error" sourceRef="Boundary_rd_err" targetRef="Task_rd_svcerr" />
+    <bpmn:sequenceFlow id="Flow_rd_end_ok"  sourceRef="Task_rd_ok"      targetRef="End_rd" />
+    <bpmn:sequenceFlow id="Flow_rd_end_ko"  sourceRef="Task_rd_httperr" targetRef="End_rd" />
+    <bpmn:sequenceFlow id="Flow_rd_end_svc" sourceRef="Task_rd_svcerr"  targetRef="End_rd" />
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_rd">
+    <bpmndi:BPMNPlane id="BPMNPlane_rd" bpmnElement="Process_MarkNotificationRead">
+      <bpmndi:BPMNShape id="Start_rd_di" bpmnElement="Start_rd">
+        <dc:Bounds x="182" y="222" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="160" y="265" width="81" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_rd_patch_di" bpmnElement="Task_rd_patch">
+        <dc:Bounds x="280" y="200" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Boundary_rd_err_di" bpmnElement="Boundary_rd_err">
+        <dc:Bounds x="342" y="262" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="GW_rd_di" bpmnElement="GW_rd" isMarkerVisible="true">
+        <dc:Bounds x="455" y="215" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_rd_ok_di" bpmnElement="Task_rd_ok">
+        <dc:Bounds x="590" y="100" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_rd_httperr_di" bpmnElement="Task_rd_httperr">
+        <dc:Bounds x="590" y="320" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_rd_svcerr_di" bpmnElement="Task_rd_svcerr">
+        <dc:Bounds x="380" y="420" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_rd_di" bpmnElement="End_rd">
+        <dc:Bounds x="762" y="222" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_rd_start_di"   bpmnElement="Flow_rd_start">
+        <di:waypoint x="218" y="240" /><di:waypoint x="280" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_rd_togw_di"    bpmnElement="Flow_rd_togw">
+        <di:waypoint x="380" y="240" /><di:waypoint x="455" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_rd_ok_di"      bpmnElement="Flow_rd_ok">
+        <di:waypoint x="480" y="215" /><di:waypoint x="480" y="140" /><di:waypoint x="590" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_rd_ko_di"      bpmnElement="Flow_rd_ko">
+        <di:waypoint x="480" y="265" /><di:waypoint x="480" y="360" /><di:waypoint x="590" y="360" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_rd_svcerr_di"  bpmnElement="Flow_rd_svcerr">
+        <di:waypoint x="360" y="298" /><di:waypoint x="360" y="460" /><di:waypoint x="380" y="460" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_rd_end_ok_di"  bpmnElement="Flow_rd_end_ok">
+        <di:waypoint x="690" y="140" /><di:waypoint x="780" y="140" /><di:waypoint x="780" y="222" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_rd_end_ko_di"  bpmnElement="Flow_rd_end_ko">
+        <di:waypoint x="690" y="360" /><di:waypoint x="780" y="360" /><di:waypoint x="780" y="258" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_rd_end_svc_di" bpmnElement="Flow_rd_end_svc">
+        <di:waypoint x="480" y="460" /><di:waypoint x="780" y="460" /><di:waypoint x="780" y="258" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

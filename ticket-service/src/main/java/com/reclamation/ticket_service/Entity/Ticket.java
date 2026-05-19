@@ -40,6 +40,7 @@ public class Ticket {
     private TicketCategory category;
 
     private String clientId;
+    private String clientEmail;
     private String agentId;
 
     @CreationTimestamp

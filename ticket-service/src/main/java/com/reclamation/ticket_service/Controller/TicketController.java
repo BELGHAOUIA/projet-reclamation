@@ -8,6 +8,7 @@ import com.reclamation.ticket_service.Repository.TicketRepository;
 import com.reclamation.ticket_service.Entity.Ticket;
 import com.reclamation.ticket_service.Enum.TicketStatus;
 import com.reclamation.ticket_service.Service.TicketService;
+import com.reclamation.ticket_service.notification.NotificationClient;
 import jakarta.annotation.Priority;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.query.Page;
@@ -27,11 +28,16 @@ public class TicketController {
     private final TicketRepository ticketRepository;
     private final TicketService ticketService;
     private final TicketHistoryRepository historyRepository;
+    private final NotificationClient notificationClient;
 
     @PostMapping
     public ResponseEntity<Ticket> create(@RequestBody Ticket ticket) {
         ticket.setStatus(TicketStatus.OPEN);
-        return ResponseEntity.ok(ticketRepository.save(ticket));
+        Ticket saved = ticketRepository.save(ticket);
+        String ticketId = saved.getId() != null ? saved.getId().toString() : null;
+        notificationClient.sendToAdmin("TICKET_CREATED", ticketId);
+        notificationClient.sendToClient(saved.getClientId(), "TICKET_CREATED", ticketId);
+        return ResponseEntity.ok(saved);
     }
 
     @GetMapping
@@ -97,7 +103,11 @@ public class TicketController {
     public ResponseEntity<Ticket> assignAgent(@PathVariable UUID id, @PathVariable String agentId) {
         Ticket ticket = ticketRepository.findById(id).orElseThrow();
         ticket.setAgentId(agentId);
-        return ResponseEntity.ok(ticketRepository.save(ticket));
+        Ticket saved = ticketRepository.save(ticket);
+        String ticketId = id.toString();
+        notificationClient.sendToAdmin("TICKET_ASSIGNED", ticketId);
+        notificationClient.sendToAgent(agentId, "TICKET_ASSIGNED", ticketId);
+        return ResponseEntity.ok(saved);
     }
 
     @PostMapping("/{id}/escalate")

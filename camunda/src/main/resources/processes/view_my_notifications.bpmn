@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:modeler="http://camunda.org/schema/modeler/1.0"
+                  id="Definitions_notif_list"
+                  targetNamespace="http://bpmn.io/schema/bpmn"
+                  exporter="Camunda Modeler"
+                  exporterVersion="5.45.0"
+                  modeler:executionPlatform="Camunda Platform"
+                  modeler:executionPlatformVersion="7.24.0">
+
+  <bpmn:process id="Process_ViewMyNotifications" name="Mes Notifications" isExecutable="true">
+
+    <!-- Start : sélection du rôle -->
+    <bpmn:startEvent id="Start_notiflist" name="Mes Notifications"
+                     camunda:formRef="form_notif_user_type.form"
+                     camunda:formRefBinding="latest">
+      <bpmn:outgoing>Flow_nl_start</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <!-- Service task : appel GET /api/v1/notifications/user/{userId}/?userType={userType} -->
+    <bpmn:serviceTask id="Task_nl_get" name="Récupérer mes notifications">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="url">http://localhost:8888/api/v1/notifications/user/${userId}/?userType=${userType}</camunda:inputParameter>
+            <camunda:inputParameter name="method">GET</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Content-Type">application/json</camunda:entry>
+              </camunda:map>
+            </camunda:inputParameter>
+            <camunda:outputParameter name="statusCode">${statusCode}</camunda:outputParameter>
+            <camunda:outputParameter name="notificationList">${response}</camunda:outputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_nl_start</bpmn:incoming>
+      <bpmn:outgoing>Flow_nl_togw</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <!-- Boundary error (service down) -->
+    <bpmn:boundaryEvent id="Boundary_nl_err" attachedToRef="Task_nl_get">
+      <bpmn:outgoing>Flow_nl_svcerr</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrDef_nl" />
+    </bpmn:boundaryEvent>
+
+    <!-- Gateway -->
+    <bpmn:exclusiveGateway id="GW_nl">
+      <bpmn:incoming>Flow_nl_togw</bpmn:incoming>
+      <bpmn:outgoing>Flow_nl_ok</bpmn:outgoing>
+      <bpmn:outgoing>Flow_nl_ko</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <!-- User task succès : afficher la liste -->
+    <bpmn:userTask id="Task_nl_show" name="Liste des notifications"
+                   camunda:formRef="notifications_list_view.form"
+                   camunda:formRefBinding="latest">
+      <bpmn:incoming>Flow_nl_ok</bpmn:incoming>
+      <bpmn:outgoing>Flow_nl_end_ok</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <!-- User task erreur HTTP -->
+    <bpmn:userTask id="Task_nl_httperr" name="Erreur de requête">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="response" label="Réponse" type="string" defaultValue="Erreur lors de la récupération des notifications." />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_nl_ko</bpmn:incoming>
+      <bpmn:outgoing>Flow_nl_end_ko</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <!-- User task erreur service -->
+    <bpmn:userTask id="Task_nl_svcerr" name="Service indisponible">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="response" label="Réponse" type="string" defaultValue="Le service de notification est indisponible." />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_nl_svcerr</bpmn:incoming>
+      <bpmn:outgoing>Flow_nl_end_svc</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <!-- End -->
+    <bpmn:endEvent id="End_nl">
+      <bpmn:incoming>Flow_nl_end_ok</bpmn:incoming>
+      <bpmn:incoming>Flow_nl_end_ko</bpmn:incoming>
+      <bpmn:incoming>Flow_nl_end_svc</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <!-- Flows -->
+    <bpmn:sequenceFlow id="Flow_nl_start"  sourceRef="Start_notiflist" targetRef="Task_nl_get" />
+    <bpmn:sequenceFlow id="Flow_nl_togw"   sourceRef="Task_nl_get"     targetRef="GW_nl" />
+    <bpmn:sequenceFlow id="Flow_nl_ok"     name="succès" sourceRef="GW_nl" targetRef="Task_nl_show">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${statusCode == 200 || statusCode == 201}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_nl_ko"     name="erreur" sourceRef="GW_nl" targetRef="Task_nl_httperr">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${statusCode != 200 &amp;&amp; statusCode != 201}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_nl_svcerr" name="service error" sourceRef="Boundary_nl_err" targetRef="Task_nl_svcerr" />
+    <bpmn:sequenceFlow id="Flow_nl_end_ok"  sourceRef="Task_nl_show"    targetRef="End_nl" />
+    <bpmn:sequenceFlow id="Flow_nl_end_ko"  sourceRef="Task_nl_httperr" targetRef="End_nl" />
+    <bpmn:sequenceFlow id="Flow_nl_end_svc" sourceRef="Task_nl_svcerr"  targetRef="End_nl" />
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_nl">
+    <bpmndi:BPMNPlane id="BPMNPlane_nl" bpmnElement="Process_ViewMyNotifications">
+      <bpmndi:BPMNShape id="Start_notiflist_di" bpmnElement="Start_notiflist">
+        <dc:Bounds x="182" y="222" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="158" y="265" width="85" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_nl_get_di" bpmnElement="Task_nl_get">
+        <dc:Bounds x="280" y="200" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Boundary_nl_err_di" bpmnElement="Boundary_nl_err">
+        <dc:Bounds x="342" y="262" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="GW_nl_di" bpmnElement="GW_nl" isMarkerVisible="true">
+        <dc:Bounds x="455" y="215" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_nl_show_di" bpmnElement="Task_nl_show">
+        <dc:Bounds x="590" y="84" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_nl_httperr_di" bpmnElement="Task_nl_httperr">
+        <dc:Bounds x="590" y="320" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_nl_svcerr_di" bpmnElement="Task_nl_svcerr">
+        <dc:Bounds x="380" y="420" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_nl_di" bpmnElement="End_nl">
+        <dc:Bounds x="762" y="212" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_nl_start_di"  bpmnElement="Flow_nl_start">
+        <di:waypoint x="218" y="240" /><di:waypoint x="280" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_nl_togw_di"   bpmnElement="Flow_nl_togw">
+        <di:waypoint x="380" y="240" /><di:waypoint x="455" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_nl_ok_di"     bpmnElement="Flow_nl_ok">
+        <di:waypoint x="480" y="215" /><di:waypoint x="480" y="124" /><di:waypoint x="590" y="124" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_nl_ko_di"     bpmnElement="Flow_nl_ko">
+        <di:waypoint x="480" y="265" /><di:waypoint x="480" y="360" /><di:waypoint x="590" y="360" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_nl_svcerr_di" bpmnElement="Flow_nl_svcerr">
+        <di:waypoint x="360" y="298" /><di:waypoint x="360" y="460" /><di:waypoint x="380" y="460" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_nl_end_ok_di"  bpmnElement="Flow_nl_end_ok">
+        <di:waypoint x="690" y="124" /><di:waypoint x="780" y="124" /><di:waypoint x="780" y="212" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_nl_end_ko_di"  bpmnElement="Flow_nl_end_ko">
+        <di:waypoint x="690" y="360" /><di:waypoint x="780" y="360" /><di:waypoint x="780" y="248" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_nl_end_svc_di" bpmnElement="Flow_nl_end_svc">
+        <di:waypoint x="480" y="460" /><di:waypoint x="780" y="460" /><di:waypoint x="780" y="248" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -2,7 +2,6 @@ package com.reclamation.ticket_service.notification;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -20,51 +19,39 @@ public class NotificationClient {
 
     private final RestTemplate restTemplate;
 
-    @Value("${admin.email:admin@reclamation.com}")
-    private String adminEmail;
-
     private static final String NOTIFICATION_URL =
             "http://NOTIFICATION-SERVICE/api/v1/notifications/send/";
 
-    private static final UUID ADMIN_ID =
-            UUID.fromString("00000000-0000-0000-0000-000000000001");
+    private static final String ADMIN_ID = "00000000-0000-0000-0000-000000000001";
 
     public void sendToAdmin(String type, String ticketId) {
         send(NotificationRequest.builder()
-                .recipientId(ADMIN_ID.toString())
+                .recipientId(ADMIN_ID)
                 .recipientType("ADMIN")
-                .recipientEmail(adminEmail)
-                .recipientName("Administrateur")
                 .type(type)
-                .channel("EMAIL")
+                .channel("IN_APP")
                 .ticketId(ticketId)
                 .build());
     }
 
-    public void sendToClient(String clientId, String clientEmail, String clientName,
-                             String type, String ticketId) {
-        if (clientEmail == null || clientEmail.isBlank()) return;
+    public void sendToClient(String clientId, String type, String ticketId) {
+        if (clientId == null || clientId.isBlank()) return;
         send(NotificationRequest.builder()
                 .recipientId(toUUID(clientId, "client:").toString())
                 .recipientType("CLIENT")
-                .recipientEmail(clientEmail)
-                .recipientName(clientName != null ? clientName : clientId)
                 .type(type)
-                .channel("EMAIL")
+                .channel("IN_APP")
                 .ticketId(ticketId)
                 .build());
     }
 
-    public void sendToAgent(String agentId, String agentEmail, String agentName,
-                            String type, String ticketId) {
-        if (agentEmail == null || agentEmail.isBlank()) return;
+    public void sendToAgent(String agentId, String type, String ticketId) {
+        if (agentId == null || agentId.isBlank()) return;
         send(NotificationRequest.builder()
                 .recipientId(toUUID(agentId, "agent:").toString())
                 .recipientType("AGENT")
-                .recipientEmail(agentEmail)
-                .recipientName(agentName != null ? agentName : agentId)
                 .type(type)
-                .channel("EMAIL")
+                .channel("IN_APP")
                 .ticketId(ticketId)
                 .build());
     }
@@ -72,10 +59,10 @@ public class NotificationClient {
     private void send(NotificationRequest req) {
         try {
             restTemplate.postForObject(NOTIFICATION_URL, req, Object.class);
-            log.info("[notification] Envoyee: type={} -> {}", req.getType(), req.getRecipientEmail());
+            log.info("[notification] Envoyee: type={} -> {}", req.getType(), req.getRecipientId());
         } catch (Exception ex) {
             log.warn("[notification] Echec envoi type={} -> {}: {}",
-                    req.getType(), req.getRecipientEmail(), ex.getMessage());
+                    req.getType(), req.getRecipientId(), ex.getMessage());
         }
     }
 
