@@ -61,11 +61,11 @@ public class AgentController {
     // ── AFFECTATION ───────────────────────────────────────
 
     @PostMapping("/assign")
-    public ResponseEntity<AssignmentResponseDTO> assignAgent(
-            @RequestParam String ticketId,
-            @RequestParam String priority,
-            @RequestParam(required = false, defaultValue = "GENERAL") String category) {
-        return ResponseEntity.ok(agentService.assignAgent(ticketId, priority, category));
+    public ResponseEntity<String> assignAgent(
+            @RequestParam String agentId,
+            @RequestParam String ticketId
+    ) {
+        return ResponseEntity.ok(agentService.assignAgent(ticketId, agentId));
     }
 
     @PostMapping("/release/{ticketId}")

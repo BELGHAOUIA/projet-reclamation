@@ -10,22 +10,67 @@
       "id": "Field_1yzqnby"
     },
     {
-      "label": "Select agent",
-      "type": "select",
+      "type": "table",
       "layout": {
-        "row": "Row_1cye4ql",
+        "row": "Row_1rwtip4",
         "columns": null
       },
-      "id": "Field_1atabmy",
+      "label": "Available Agents",
+      "rowCount": 10,
+      "columns": [
+        {
+          "label": "ID",
+          "key": "id"
+        },
+        {
+          "label": "First Name",
+          "key": "firstName"
+        },
+        {
+          "label": "Last Name",
+          "key": "lastName"
+        },
+        {
+          "label": "Email",
+          "key": "email"
+        },
+        {
+          "label": "Specialty",
+          "key": "specialty"
+        },
+        {
+          "label": "Level",
+          "key": "level"
+        },
+        {
+          "label": "Department",
+          "key": "department"
+        },
+        {
+          "label": "Current Ticket Count",
+          "key": "currentTicketCount"
+        }
+      ],
+      "id": "Field_15zit2g",
+      "dataSource": "=agents"
+    },
+    {
+      "label": "Paste Agent ID",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_0vk5cxi",
+        "columns": null
+      },
+      "id": "Field_1m0x7fs",
       "key": "agentId",
-      "valuesKey": "agents"
+      "description": "agentId"
     },
     {
       "label": "Submit",
       "action": "submit",
       "type": "button",
       "layout": {
-        "row": "Row_0vk5cxi",
+        "row": "Row_1c3vbxu",
         "columns": null
       },
       "id": "Field_0zldydu"
