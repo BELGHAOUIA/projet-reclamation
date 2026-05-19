@@ -25,7 +25,53 @@ public class AgentService {
 
     // ── CRUD ──────────────────────────────────────────────
 
+    private void validateAgent(AgentRequestDTO dto) {
+
+        // vérifier email déjà utilisé
+        boolean emailExists = agentRepository.findAll()
+                .stream()
+                .anyMatch(agent ->
+                        agent.getEmail().equalsIgnoreCase(dto.getEmail()));
+
+        if (emailExists) {
+            throw new RuntimeException("Email already exists");
+        }
+
+        // téléphone numérique uniquement
+        if (!dto.getPhone().matches("\\d+")) {
+            throw new RuntimeException("Phone must contain only numbers");
+        }
+
+        // taille téléphone
+        if (dto.getPhone().length() < 8) {
+            throw new RuntimeException("Phone must contain at least 8 digits");
+        }
+
+        // max tickets
+        if (dto.getMaxTickets() <= 0) {
+            throw new RuntimeException("Max tickets must be greater than 0");
+        }
+
+        if (dto.getMaxTickets() > 20) {
+            throw new RuntimeException("Max tickets cannot exceed 20");
+        }
+
+        // validation department
+        List<String> departments = List.of(
+                "IT",
+                "RH",
+                "SUPPORT",
+                "COMMERCIAL"
+        );
+
+        if (!departments.contains(dto.getDepartment().toUpperCase())) {
+            throw new RuntimeException("Invalid department");
+        }
+    }
     public AgentResponseDTO createAgent(AgentRequestDTO dto) {
+
+        validateAgent(dto);
+
         Agent agent = Agent.builder()
                 .firstName(dto.getFirstName())
                 .lastName(dto.getLastName())
@@ -38,6 +84,7 @@ public class AgentService {
                 .currentTicketCount(0)
                 .status(AgentStatus.AVAILABLE)
                 .build();
+
         return toDTO(agentRepository.save(agent));
     }
 
