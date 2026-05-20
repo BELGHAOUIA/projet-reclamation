@@ -69,6 +69,7 @@ class NotificationCreateSerializer(serializers.ModelSerializer):
         source='recipient_email',
         required=False,
         allow_blank=True,
+        allow_null=True,
         default='',
     )
     ticketId       = serializers.UUIDField(
@@ -81,6 +82,7 @@ class NotificationCreateSerializer(serializers.ModelSerializer):
     recipientName  = serializers.CharField(
         required=False,
         allow_blank=True,
+        allow_null=True,
         default='',
         write_only=True,
     )
@@ -95,6 +97,9 @@ class NotificationCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # recipientName est write_only et n'existe pas sur le modèle
         validated_data.pop('recipientName', None)
+        # Java envoie null pour les champs optionnels non définis — normaliser en ''
+        if validated_data.get('recipient_email') is None:
+            validated_data['recipient_email'] = ''
         return super().create(validated_data)
 
 

@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:modeler="http://camunda.org/schema/modeler/1.0"
+                  id="Definitions_weather"
+                  targetNamespace="http://bpmn.io/schema/bpmn"
+                  exporter="Camunda Modeler"
+                  exporterVersion="5.45.0"
+                  modeler:executionPlatform="Camunda Platform"
+                  modeler:executionPlatformVersion="7.24.0">
+
+  <bpmn:process id="Process_WeatherQuery" name="Météo" isExecutable="true">
+
+    <!-- Start : saisir la ville, la clé API et les unités -->
+    <bpmn:startEvent id="Start_wq" name="Consulter la météo"
+                     camunda:formRef="form_weather_query.form"
+                     camunda:formRefBinding="latest">
+      <bpmn:outgoing>Flow_wq_start</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <!-- Service task : GET /weather/weather?q={city}&appid={apiKey}&units={units}
+         Le gateway réécrit en : https://api.openweathermap.org/data/2.5/weather?... -->
+    <bpmn:serviceTask id="Task_wq_get" name="Appel API Météo">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="url">http://localhost:8888/weather/weather?q=${city}&amp;appid=${apiKey}&amp;units=${units}</camunda:inputParameter>
+            <camunda:inputParameter name="method">GET</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Content-Type">application/json</camunda:entry>
+              </camunda:map>
+            </camunda:inputParameter>
+            <!-- Statut HTTP brut -->
+            <camunda:outputParameter name="statusCode">${statusCode}</camunda:outputParameter>
+            <!-- Réponse brute JSON (pour affichage dans textarea) -->
+            <camunda:outputParameter name="weatherRawResponse">${response}</camunda:outputParameter>
+            <!-- Champs extraits par SpinJSON — protégés par ternaire si statusCode != 200 -->
+            <camunda:outputParameter name="weatherCity">${statusCode == 200 ? S(response).prop("name").value() : ""}</camunda:outputParameter>
+            <camunda:outputParameter name="weatherCountry">${statusCode == 200 ? S(response).prop("sys").prop("country").value() : ""}</camunda:outputParameter>
+            <camunda:outputParameter name="weatherTemp">${statusCode == 200 ? S(response).prop("main").prop("temp").value() : ""}</camunda:outputParameter>
+            <camunda:outputParameter name="weatherFeelsLike">${statusCode == 200 ? S(response).prop("main").prop("feels_like").value() : ""}</camunda:outputParameter>
+            <camunda:outputParameter name="weatherHumidity">${statusCode == 200 ? S(response).prop("main").prop("humidity").value() : ""}</camunda:outputParameter>
+            <camunda:outputParameter name="weatherWindSpeed">${statusCode == 200 ? S(response).prop("wind").prop("speed").value() : ""}</camunda:outputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_wq_start</bpmn:incoming>
+      <bpmn:outgoing>Flow_wq_togw</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <!-- Boundary error : gateway injoignable ou circuit-breaker déclenché -->
+    <bpmn:boundaryEvent id="Boundary_wq_err" attachedToRef="Task_wq_get">
+      <bpmn:outgoing>Flow_wq_svcerr</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrDef_wq" />
+    </bpmn:boundaryEvent>
+
+    <!-- Gateway : succès (200) ou erreur HTTP (401/404/…) -->
+    <bpmn:exclusiveGateway id="GW_wq">
+      <bpmn:incoming>Flow_wq_togw</bpmn:incoming>
+      <bpmn:outgoing>Flow_wq_ok</bpmn:outgoing>
+      <bpmn:outgoing>Flow_wq_ko</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <!-- User task : afficher les résultats météo -->
+    <bpmn:userTask id="Task_wq_show" name="Résultats Météo"
+                   camunda:formRef="form_weather_result.form"
+                   camunda:formRefBinding="latest">
+      <bpmn:incoming>Flow_wq_ok</bpmn:incoming>
+      <bpmn:outgoing>Flow_wq_end_ok</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <!-- User task : erreur HTTP (ville introuvable, clé invalide, …) -->
+    <bpmn:userTask id="Task_wq_httperr" name="Erreur API Météo">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="errMsg" label="Erreur" type="string"
+                             defaultValue="Ville introuvable ou clé API invalide. Vérifiez vos saisies." />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_wq_ko</bpmn:incoming>
+      <bpmn:outgoing>Flow_wq_end_ko</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <!-- User task : erreur de connexion (gateway ou service externe indisponible) -->
+    <bpmn:userTask id="Task_wq_svcerr" name="Service indisponible">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="errMsg" label="Erreur" type="string"
+                             defaultValue="Le service météo est indisponible. Vérifiez la connexion au gateway." />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_wq_svcerr</bpmn:incoming>
+      <bpmn:outgoing>Flow_wq_end_svc</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <!-- End -->
+    <bpmn:endEvent id="End_wq">
+      <bpmn:incoming>Flow_wq_end_ok</bpmn:incoming>
+      <bpmn:incoming>Flow_wq_end_ko</bpmn:incoming>
+      <bpmn:incoming>Flow_wq_end_svc</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <!-- Sequence flows -->
+    <bpmn:sequenceFlow id="Flow_wq_start"    sourceRef="Start_wq"       targetRef="Task_wq_get" />
+    <bpmn:sequenceFlow id="Flow_wq_togw"     sourceRef="Task_wq_get"    targetRef="GW_wq" />
+    <bpmn:sequenceFlow id="Flow_wq_ok"       name="succès" sourceRef="GW_wq" targetRef="Task_wq_show">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${statusCode == 200}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_wq_ko"       name="erreur" sourceRef="GW_wq" targetRef="Task_wq_httperr">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${statusCode != 200}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_wq_svcerr"   name="service error" sourceRef="Boundary_wq_err" targetRef="Task_wq_svcerr" />
+    <bpmn:sequenceFlow id="Flow_wq_end_ok"   sourceRef="Task_wq_show"    targetRef="End_wq" />
+    <bpmn:sequenceFlow id="Flow_wq_end_ko"   sourceRef="Task_wq_httperr" targetRef="End_wq" />
+    <bpmn:sequenceFlow id="Flow_wq_end_svc"  sourceRef="Task_wq_svcerr"  targetRef="End_wq" />
+
+  </bpmn:process>
+
+  <!-- ═══════════════════════════════ DIAGRAM ═══════════════════════════════ -->
+  <bpmndi:BPMNDiagram id="BPMNDiagram_wq">
+    <bpmndi:BPMNPlane id="BPMNPlane_wq" bpmnElement="Process_WeatherQuery">
+
+      <!-- Start -->
+      <bpmndi:BPMNShape id="Start_wq_di" bpmnElement="Start_wq">
+        <dc:Bounds x="152" y="222" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="125" y="265" width="91" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Service task GET -->
+      <bpmndi:BPMNShape id="Task_wq_get_di" bpmnElement="Task_wq_get">
+        <dc:Bounds x="260" y="200" width="100" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- Boundary error -->
+      <bpmndi:BPMNShape id="Boundary_wq_err_di" bpmnElement="Boundary_wq_err">
+        <dc:Bounds x="322" y="262" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <!-- Gateway -->
+      <bpmndi:BPMNShape id="GW_wq_di" bpmnElement="GW_wq" isMarkerVisible="true">
+        <dc:Bounds x="435" y="215" width="50" height="50" />
+      </bpmndi:BPMNShape>
+
+      <!-- Show result task (top branch) -->
+      <bpmndi:BPMNShape id="Task_wq_show_di" bpmnElement="Task_wq_show">
+        <dc:Bounds x="570" y="84" width="100" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- HTTP error task (bottom branch) -->
+      <bpmndi:BPMNShape id="Task_wq_httperr_di" bpmnElement="Task_wq_httperr">
+        <dc:Bounds x="570" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- Service error task (boundary path) -->
+      <bpmndi:BPMNShape id="Task_wq_svcerr_di" bpmnElement="Task_wq_svcerr">
+        <dc:Bounds x="260" y="390" width="100" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- End event -->
+      <bpmndi:BPMNShape id="End_wq_di" bpmnElement="End_wq">
+        <dc:Bounds x="762" y="222" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <!-- Edges -->
+      <bpmndi:BPMNEdge id="Flow_wq_start_di" bpmnElement="Flow_wq_start">
+        <di:waypoint x="188" y="240" />
+        <di:waypoint x="260" y="240" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_wq_togw_di" bpmnElement="Flow_wq_togw">
+        <di:waypoint x="360" y="240" />
+        <di:waypoint x="435" y="240" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_wq_ok_di" bpmnElement="Flow_wq_ok">
+        <di:waypoint x="460" y="215" />
+        <di:waypoint x="460" y="124" />
+        <di:waypoint x="570" y="124" />
+        <bpmndi:BPMNLabel><dc:Bounds x="474" y="163" width="35" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_wq_ko_di" bpmnElement="Flow_wq_ko">
+        <di:waypoint x="460" y="265" />
+        <di:waypoint x="460" y="350" />
+        <di:waypoint x="570" y="350" />
+        <bpmndi:BPMNLabel><dc:Bounds x="474" y="294" width="35" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_wq_svcerr_di" bpmnElement="Flow_wq_svcerr">
+        <di:waypoint x="340" y="298" />
+        <di:waypoint x="310" y="390" />
+        <bpmndi:BPMNLabel><dc:Bounds x="294" y="338" width="72" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_wq_end_ok_di" bpmnElement="Flow_wq_end_ok">
+        <di:waypoint x="670" y="124" />
+        <di:waypoint x="780" y="124" />
+        <di:waypoint x="780" y="222" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_wq_end_ko_di" bpmnElement="Flow_wq_end_ko">
+        <di:waypoint x="670" y="350" />
+        <di:waypoint x="780" y="350" />
+        <di:waypoint x="780" y="258" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_wq_end_svc_di" bpmnElement="Flow_wq_end_svc">
+        <di:waypoint x="360" y="430" />
+        <di:waypoint x="780" y="430" />
+        <di:waypoint x="780" y="258" />
+      </bpmndi:BPMNEdge>
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+
+</bpmn:definitions>
