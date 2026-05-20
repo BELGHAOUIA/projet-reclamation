@@ -185,7 +185,6 @@
               </camunda:map>
             </camunda:inputParameter>
             <camunda:outputParameter name="statusCode">${statusCode}</camunda:outputParameter>
-            <camunda:outputParameter name="ticketList">${S(response)}</camunda:outputParameter>
           </camunda:inputOutput>
           <camunda:connectorId>http-connector</camunda:connectorId>
         </camunda:connector>

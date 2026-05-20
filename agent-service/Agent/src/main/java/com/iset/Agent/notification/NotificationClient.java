@@ -20,9 +20,9 @@ public class NotificationClient {
     private final RestTemplate restTemplate;
 
     private static final String NOTIFICATION_URL =
-            "http://NOTIFICATION-SERVICE/api/v1/notifications/send/";
+            "http://localhost:8888/api/v1/notifications/send/";
 
-    private static final String ADMIN_ID = "00000000-0000-0000-0000-000000000001";
+    private static final String ADMIN_ID = "ADMIN";
 
     public void sendToAdmin(String type, String ticketId) {
         send(NotificationRequest.builder()
@@ -37,7 +37,7 @@ public class NotificationClient {
     public void sendToClient(String clientId, String type, String ticketId) {
         if (clientId == null || clientId.isBlank()) return;
         send(NotificationRequest.builder()
-                .recipientId(toUUID(clientId, "client:").toString())
+                .recipientId(clientId)
                 .recipientType("CLIENT")
                 .type(type)
                 .channel("IN_APP")
@@ -48,7 +48,7 @@ public class NotificationClient {
     public void sendToAgent(String agentId, String type, String ticketId) {
         if (agentId == null || agentId.isBlank()) return;
         send(NotificationRequest.builder()
-                .recipientId(toUUID(agentId, "agent:").toString())
+                .recipientId(agentId)
                 .recipientType("AGENT")
                 .type(type)
                 .channel("IN_APP")
@@ -66,11 +66,7 @@ public class NotificationClient {
         }
     }
 
-    private UUID toUUID(String id, String prefix) {
-        try {
+    private UUID toUUID(String id) {
             return UUID.fromString(id);
-        } catch (IllegalArgumentException e) {
-            return UUID.nameUUIDFromBytes((prefix + id).getBytes(StandardCharsets.UTF_8));
-        }
     }
 }
