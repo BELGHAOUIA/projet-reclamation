@@ -1,0 +1,24 @@
+{
+  "components": [
+    {
+      "label": "L'opération de suppression a été annulée.",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_0b8jpgr",
+        "columns": null
+      },
+      "id": "Field_02ouwf8",
+      "key": "textfield_s14y6",
+      "readonly": true
+    }
+  ],
+  "type": "default",
+  "id": "annulation",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.45.0"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.24.0",
+  "schemaVersion": 19
+}

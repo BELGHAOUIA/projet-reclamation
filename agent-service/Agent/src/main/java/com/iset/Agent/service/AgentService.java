@@ -31,48 +31,32 @@ public class AgentService {
     // ── CRUD ──────────────────────────────────────────────
 
     private void validateAgent(AgentRequestDTO dto) {
-
-        // vérifier email déjà utilisé
         boolean emailExists = agentRepository.findAll()
                 .stream()
-                .anyMatch(agent ->
-                        agent.getEmail().equalsIgnoreCase(dto.getEmail()));
+                .anyMatch(agent -> agent.getEmail().equalsIgnoreCase(dto.getEmail()));
 
         if (emailExists) {
-            throw new RuntimeException("Email already exists");
+            throw new IllegalArgumentException("L'adresse email est déjà utilisée.");
         }
 
-        // téléphone numérique uniquement
         if (!dto.getPhone().matches("\\d+")) {
-            throw new RuntimeException("Phone must contain only numbers");
+            throw new IllegalArgumentException("Le numéro de téléphone doit contenir uniquement des chiffres.");
         }
 
-        // taille téléphone
         if (dto.getPhone().length() < 8) {
-            throw new RuntimeException("Phone must contain at least 8 digits");
+            throw new IllegalArgumentException("Le numéro de téléphone doit contenir au moins 8 chiffres.");
         }
 
-        // max tickets
-        if (dto.getMaxTickets() <= 0) {
-            throw new RuntimeException("Max tickets must be greater than 0");
+        if (dto.getMaxTickets() <= 0 || dto.getMaxTickets() > 20) {
+            throw new IllegalArgumentException("Le nombre maximal de tickets doit être compris entre 1 et 20.");
         }
 
-        if (dto.getMaxTickets() > 20) {
-            throw new RuntimeException("Max tickets cannot exceed 20");
-        }
-
-        // validation department
-        List<String> departments = List.of(
-                "IT",
-                "RH",
-                "SUPPORT",
-                "COMMERCIAL"
-        );
-
+        List<String> departments = List.of("IT", "RH", "SUPPORT", "COMMERCIAL");
         if (!departments.contains(dto.getDepartment().toUpperCase())) {
-            throw new RuntimeException("Invalid department");
+            throw new IllegalArgumentException("Département invalide.");
         }
     }
+    @Transactional
     public AgentResponseDTO createAgent(AgentRequestDTO dto) {
 
         validateAgent(dto);

@@ -1,0 +1,33 @@
+{
+  "components": [
+    {
+      "label": "Saisir ID Agent à modifier",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_039t8oh",
+        "columns": null
+      },
+      "id": "Field_1f2hwxk",
+      "key": "agentId"
+    },
+    {
+      "label": "Statut",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_05ckqzo",
+        "columns": null
+      },
+      "id": "Field_1s4d9ik",
+      "key": "messageRetour"
+    }
+  ],
+  "type": "default",
+  "id": "form_recherche_agent",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.45.0"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.24.0",
+  "schemaVersion": 19
+}

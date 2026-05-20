@@ -1,60 +1,74 @@
 {
   "components": [
     {
+      "label": "Statut",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_18kjm5n",
+        "columns": null
+      },
+      "id": "Field_1ev0vt4",
+      "key": "messageRetour",
+      "readonly": true
+    },
+    {
       "label": "First Name",
       "type": "textfield",
       "layout": {
-        "row": "Row_0av2cvr",
+        "row": "Row_08aac2k",
         "columns": null
       },
-      "id": "Field_0gf6dkj",
+      "id": "Field_11h8oz8",
       "key": "firstName",
       "validate": {
         "required": true
-      }
+      },
+      "readonly": true
     },
     {
       "label": "Last Name",
       "type": "textfield",
       "layout": {
-        "row": "Row_17wbb0z",
+        "row": "Row_0wif3p4",
         "columns": null
       },
-      "id": "Field_0xdd0t3",
+      "id": "Field_1i9safa",
       "key": "lastName",
       "validate": {
         "required": true
-      }
+      },
+      "readonly": true
     },
     {
       "label": "Email",
       "type": "textfield",
       "layout": {
-        "row": "Row_04dal9f",
+        "row": "Row_0f58i5k",
         "columns": null
       },
-      "id": "Field_1ya060s",
+      "id": "Field_1dwd7wf",
       "key": "email",
       "validate": {
         "required": true,
         "validationType": "email"
-      }
+      },
+      "readonly": true
     },
     {
       "label": "Phone",
       "type": "textfield",
       "layout": {
-        "row": "Row_1gao5z7",
+        "row": "Row_01ic4qs",
         "columns": null
       },
-      "id": "Field_03flx41",
+      "id": "Field_1geh598",
       "key": "phone",
       "validate": {
         "required": true,
         "minLength": "8",
         "maxLength": "8"
       },
-      "properties": {}
+      "readonly": true
     },
     {
       "label": "Specialty",
@@ -82,14 +96,15 @@
       ],
       "type": "select",
       "layout": {
-        "row": "Row_1h68mrh",
+        "row": "Row_0b21m3h",
         "columns": null
       },
-      "id": "Field_0zig4vb",
+      "id": "Field_13hv7mc",
       "key": "specialty",
       "validate": {
         "required": true
-      }
+      },
+      "readonly": true
     },
     {
       "label": "Level",
@@ -113,56 +128,79 @@
       ],
       "type": "select",
       "layout": {
-        "row": "Row_08xgwng",
+        "row": "Row_0pb604u",
         "columns": null
       },
-      "id": "Field_0q1vy9v",
+      "id": "Field_0ilpv4o",
       "key": "level",
       "validate": {
         "required": true
-      }
+      },
+      "readonly": true
     },
     {
       "label": "Department",
       "type": "textfield",
       "layout": {
-        "row": "Row_0qqywzr",
+        "row": "Row_1wm974y",
         "columns": null
       },
-      "id": "Field_00umt2n",
+      "id": "Field_1yw46c1",
       "key": "department",
       "validate": {
         "required": true
-      }
+      },
+      "readonly": true
     },
     {
       "label": "Max Tickets",
       "type": "number",
       "layout": {
-        "row": "Row_021dll2",
+        "row": "Row_04eg3r9",
         "columns": null
       },
-      "id": "Field_15cqw24",
+      "id": "Field_1qao2aw",
       "key": "maxTickets",
       "validate": {
         "required": true,
         "min": "1",
         "max": "5"
-      }
+      },
+      "readonly": true
     },
     {
-      "label": "Submit",
+      "label": "Que voulez-vous faire ?",
+      "values": [
+        {
+          "label": "Supprimer l'agent",
+          "value": "supprimer"
+        },
+        {
+          "label": "Annuler et quitter",
+          "value": "annuler"
+        }
+      ],
+      "type": "radio",
+      "layout": {
+        "row": "Row_0ddux12",
+        "columns": null
+      },
+      "id": "Field_0q8f9mo",
+      "key": "action"
+    },
+    {
+      "label": "Valider",
       "action": "submit",
       "type": "button",
       "layout": {
-        "row": "Row_1ppcuj3",
+        "row": "Row_0o3apq1",
         "columns": null
       },
-      "id": "Field_15iwcqc"
+      "id": "Field_175nshi"
     }
   ],
   "type": "default",
-  "id": "Form_0qe67te",
+  "id": "form_confirmer_delete",
   "exporter": {
     "name": "Camunda Modeler",
     "version": "5.45.0"

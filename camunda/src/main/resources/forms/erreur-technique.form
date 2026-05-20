@@ -1,0 +1,24 @@
+{
+  "components": [
+    {
+      "label": "Erreur Système",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_00qw4hv",
+        "columns": null
+      },
+      "id": "Field_0c030t8",
+      "key": "messageTechnique",
+      "readonly": true
+    }
+  ],
+  "type": "default",
+  "id": "Form_1jcfnzu",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.45.0"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.24.0",
+  "schemaVersion": 19
+}

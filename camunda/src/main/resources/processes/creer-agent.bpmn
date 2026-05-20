@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1rg1wat" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.45.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.24.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1rg1wat" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.45.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.24.0">
   <bpmn:process id="Process_0duwh8t" name="Gestion Agent" isExecutable="true" camunda:historyTimeToLive="180">
     <bpmn:startEvent id="StartEvent_1" camunda:formRef="Form_0qe67te" camunda:formRefBinding="latest">
       <bpmn:extensionElements />
@@ -7,7 +7,7 @@
     </bpmn:startEvent>
     <bpmn:userTask id="Activity_0teicha" name="Saisir données agent" camunda:formRef="Form_0qe67te" camunda:formRefBinding="latest">
       <bpmn:incoming>Flow_1v41wov</bpmn:incoming>
-      <bpmn:outgoing>Flow_0aksuso</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0po8fek</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:sequenceFlow id="Flow_1v41wov" sourceRef="StartEvent_1" targetRef="Activity_0teicha" />
     <bpmn:serviceTask id="Activity_1ug66vt" name="Save Agent">
@@ -31,20 +31,25 @@
   "department": "${department}",
   "maxTickets": ${maxTickets}
 }</camunda:inputParameter>
-            <camunda:outputParameter name="response">${S(response)}</camunda:outputParameter>
-            <camunda:outputParameter name="statusCode">
-              <camunda:script scriptFormat="javascript">// Si le serveur renvoie une erreur (400, 500, etc.)
-if (connector.getVariable("statusCode") &gt;= 400) {
-    // On extrait la réponse texte du serveur (ex: "Le numéro doit contenir 8 chiffres")
-    var ErrorMsg = connector.getVariable("response"); 
-    
-    // On sauvegarde ce message dans une variable Camunda globale
-    connector.setVariable("messageErreurServeur", ErrorMsg);
-    
-    // On déclenche l'éclair
-    throw new org.camunda.bpm.engine.delegate.BpmnError("erreur_serveur");
-}</camunda:script>
-            </camunda:outputParameter>
+            <camunda:outputParameter name="response">${response}</camunda:outputParameter>
+            <camunda:outputParameter name="statusCode">${statusCode}</camunda:outputParameter>
+            <camunda:outputParameter name="messageRetour">var status = statusCode.toString();
+
+if (status == "201" || status == "200") {
+    // Si ton API répond avec ton objet ApiResponse
+    S(response).prop("message").stringValue();
+} else {
+    try {
+        // On essaie d'extraire le message d'erreur de ton ApiResponse
+        S(response).prop("message").stringValue();
+    } catch(e) {
+        // Fallback si le JSON est mal formé ou si c'est une erreur 500 brute
+        "Une erreur est survenue lors de la validation des données.";
+    }
+}</camunda:outputParameter>
+            <camunda:outputParameter name="isSuccess">var jsonResponse = S(response);
+// Si le champ 'success' existe, on prend sa valeur, sinon on met false (par échec)
+jsonResponse.hasProp("success") ? jsonResponse.prop("success").boolValue() : false;</camunda:outputParameter>
           </camunda:inputOutput>
           <camunda:connectorId>http-connector</camunda:connectorId>
         </camunda:connector>
@@ -52,78 +57,106 @@ if (connector.getVariable("statusCode") &gt;= 400) {
           <camunda:inputParameter name="errorResponseParameter">statusCode</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_0aksuso</bpmn:incoming>
-      <bpmn:incoming>Flow_0zkilrj</bpmn:incoming>
+      <bpmn:incoming>Flow_0po8fek</bpmn:incoming>
+      <bpmn:incoming>Flow_016c5oj</bpmn:incoming>
       <bpmn:outgoing>Flow_02u9yt3</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="Event_0sxyceo">
-      <bpmn:incoming>Flow_02u9yt3</bpmn:incoming>
+      <bpmn:incoming>Flow_0k8fl14</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:userTask id="Activity_0ejk8av" name="Corriger les données de l&#39;agent" camunda:formRef="Form_0qe67te" camunda:formRefBinding="latest">
-      <bpmn:extensionElements>
-        <camunda:inputOutput>
-          <camunda:inputParameter name="messageErreurServeur">${messageErreurServeur}</camunda:inputParameter>
-        </camunda:inputOutput>
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_100w2ow</bpmn:incoming>
-      <bpmn:outgoing>Flow_0zkilrj</bpmn:outgoing>
+    <bpmn:userTask id="Activity_0ejk8av" name="Corriger les données de l&#39;agent" camunda:formRef="Form_18atljt" camunda:formRefBinding="latest">
+      <bpmn:extensionElements />
+      <bpmn:incoming>flowNonValide</bpmn:incoming>
+      <bpmn:outgoing>Flow_016c5oj</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:sequenceFlow id="Flow_0aksuso" sourceRef="Activity_0teicha" targetRef="Activity_1ug66vt" />
-    <bpmn:sequenceFlow id="Flow_0zkilrj" sourceRef="Activity_0ejk8av" targetRef="Activity_1ug66vt" />
-    <bpmn:boundaryEvent id="Event_1y4jcz6" attachedToRef="Activity_1ug66vt">
-      <bpmn:outgoing>Flow_100w2ow</bpmn:outgoing>
-      <bpmn:errorEventDefinition id="ErrorEventDefinition_14lpqhc" camunda:errorCodeVariable="erreur_serveur" />
-    </bpmn:boundaryEvent>
-    <bpmn:sequenceFlow id="Flow_100w2ow" sourceRef="Event_1y4jcz6" targetRef="Activity_0ejk8av" />
-    <bpmn:sequenceFlow id="Flow_02u9yt3" sourceRef="Activity_1ug66vt" targetRef="Event_0sxyceo" />
+    <bpmn:sequenceFlow id="Flow_02u9yt3" sourceRef="Activity_1ug66vt" targetRef="checkValidationGateway" />
+    <bpmn:exclusiveGateway id="checkValidationGateway" name="Données valides ?">
+      <bpmn:incoming>Flow_02u9yt3</bpmn:incoming>
+      <bpmn:outgoing>Flow_1vbsmj8</bpmn:outgoing>
+      <bpmn:outgoing>flowNonValide</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1vbsmj8" name="flowValide" sourceRef="checkValidationGateway" targetRef="Activity_0cymujq">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isSuccess == true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="flowNonValide" name="non validé" sourceRef="checkValidationGateway" targetRef="Activity_0ejk8av">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isSuccess == false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0po8fek" sourceRef="Activity_0teicha" targetRef="Activity_1ug66vt" />
+    <bpmn:userTask id="Activity_0cymujq" name="Agent créé" camunda:formRef="Form_0jrewzx" camunda:formRefBinding="latest">
+      <bpmn:incoming>Flow_1vbsmj8</bpmn:incoming>
+      <bpmn:outgoing>Flow_0k8fl14</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_0k8fl14" sourceRef="Activity_0cymujq" targetRef="Event_0sxyceo" />
+    <bpmn:sequenceFlow id="Flow_016c5oj" sourceRef="Activity_0ejk8av" targetRef="Activity_1ug66vt" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_0duwh8t">
       <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
-        <dc:Bounds x="182" y="102" width="36" height="36" />
+        <dc:Bounds x="182" y="112" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0teicha_di" bpmnElement="Activity_0teicha">
-        <dc:Bounds x="270" y="80" width="100" height="80" />
+        <dc:Bounds x="270" y="90" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1ug66vt_di" bpmnElement="Activity_1ug66vt">
-        <dc:Bounds x="430" y="80" width="100" height="80" />
+        <dc:Bounds x="460" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0pcyyv1_di" bpmnElement="checkValidationGateway" isMarkerVisible="true">
+        <dc:Bounds x="675" y="95" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="659" y="65" width="82" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ejk8av_di" bpmnElement="Activity_0ejk8av">
+        <dc:Bounds x="650" y="280" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0sxyceo_di" bpmnElement="Event_0sxyceo">
-        <dc:Bounds x="832" y="102" width="36" height="36" />
+        <dc:Bounds x="1022" y="192" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0ejk8av_di" bpmnElement="Activity_0ejk8av">
-        <dc:Bounds x="600" y="158" width="100" height="80" />
+      <bpmndi:BPMNShape id="Activity_0cymujq_di" bpmnElement="Activity_0cymujq">
+        <dc:Bounds x="840" y="80" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1y4jcz6_di" bpmnElement="Event_1y4jcz6">
-        <dc:Bounds x="462" y="142" width="36" height="36" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1v41wov_di" bpmnElement="Flow_1v41wov">
-        <di:waypoint x="218" y="120" />
-        <di:waypoint x="270" y="120" />
+        <di:waypoint x="218" y="130" />
+        <di:waypoint x="270" y="130" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0aksuso_di" bpmnElement="Flow_0aksuso">
-        <di:waypoint x="370" y="120" />
-        <di:waypoint x="430" y="120" />
+      <bpmndi:BPMNEdge id="Flow_016c5oj_di" bpmnElement="Flow_016c5oj">
+        <di:waypoint x="650" y="340" />
+        <di:waypoint x="510" y="340" />
+        <di:waypoint x="510" y="160" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_100w2ow_di" bpmnElement="Flow_100w2ow">
-        <di:waypoint x="480" y="178" />
-        <di:waypoint x="480" y="198" />
-        <di:waypoint x="540" y="198" />
-        <di:waypoint x="540" y="208" />
-        <di:waypoint x="600" y="208" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0zkilrj_di" bpmnElement="Flow_0zkilrj">
-        <di:waypoint x="600" y="198" />
-        <di:waypoint x="565" y="198" />
-        <di:waypoint x="565" y="140" />
-        <di:waypoint x="530" y="140" />
+      <bpmndi:BPMNEdge id="Flow_0po8fek_di" bpmnElement="Flow_0po8fek">
+        <di:waypoint x="370" y="130" />
+        <di:waypoint x="415" y="130" />
+        <di:waypoint x="415" y="120" />
+        <di:waypoint x="460" y="120" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_02u9yt3_di" bpmnElement="Flow_02u9yt3">
-        <di:waypoint x="530" y="120" />
-        <di:waypoint x="832" y="120" />
+        <di:waypoint x="560" y="120" />
+        <di:waypoint x="675" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ebrv3t_di" bpmnElement="flowNonValide">
+        <di:waypoint x="700" y="145" />
+        <di:waypoint x="700" y="280" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="704" y="223" width="51" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1vbsmj8_di" bpmnElement="Flow_1vbsmj8">
+        <di:waypoint x="725" y="120" />
+        <di:waypoint x="840" y="120" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="748" y="123" width="49" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0k8fl14_di" bpmnElement="Flow_0k8fl14">
+        <di:waypoint x="940" y="120" />
+        <di:waypoint x="981" y="120" />
+        <di:waypoint x="981" y="210" />
+        <di:waypoint x="1022" y="210" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

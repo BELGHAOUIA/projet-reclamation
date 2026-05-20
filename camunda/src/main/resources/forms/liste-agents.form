@@ -1,0 +1,58 @@
+{
+  "components": [
+    {
+      "type": "table",
+      "layout": {
+        "row": "Row_1gno56b",
+        "columns": null
+      },
+      "label": "Table",
+      "rowCount": 10,
+      "columns": [
+        {
+          "label": "First Name",
+          "key": "firstName"
+        },
+        {
+          "label": "Last Name",
+          "key": "lastName"
+        },
+        {
+          "label": "Email",
+          "key": "email"
+        },
+        {
+          "label": "Phone",
+          "key": "phone"
+        },
+        {
+          "label": "Department",
+          "key": "department"
+        },
+        {
+          "label": "Specialty",
+          "key": "specialty"
+        },
+        {
+          "label": "Level",
+          "key": "level"
+        },
+        {
+          "label": "Max Tickets",
+          "key": "maxTickets"
+        }
+      ],
+      "id": "Field_1fvn3do",
+      "dataSource": "=agentsList"
+    }
+  ],
+  "type": "default",
+  "id": "Form_1ibtkpi",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.45.0"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.24.0",
+  "schemaVersion": 19
+}

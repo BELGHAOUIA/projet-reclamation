@@ -1,0 +1,34 @@
+{
+  "components": [
+    {
+      "label": "Saisir ID Agent à supprimer",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_08gteo8",
+        "columns": null
+      },
+      "id": "Field_0kf1ncg",
+      "key": "agentId"
+    },
+    {
+      "label": "Statut",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_0ozzrnr",
+        "columns": null
+      },
+      "id": "Field_17mscq4",
+      "key": "messageRetour",
+      "readonly": true
+    }
+  ],
+  "type": "default",
+  "id": "form_recherche_delete",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.45.0"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.24.0",
+  "schemaVersion": 19
+}

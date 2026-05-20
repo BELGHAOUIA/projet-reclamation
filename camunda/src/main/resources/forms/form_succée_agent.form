@@ -1,0 +1,24 @@
+{
+  "components": [
+    {
+      "label": "Statut de l'inscription",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_09ub3aj",
+        "columns": null
+      },
+      "id": "Field_0xzigop",
+      "key": "messageRetour",
+      "readonly": true
+    }
+  ],
+  "type": "default",
+  "id": "Form_0jrewzx",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.45.0"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.24.0",
+  "schemaVersion": 19
+}

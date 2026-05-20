@@ -2,6 +2,8 @@ package com.iset.Agent.controller;
 
 import com.iset.Agent.dto.*;
 import com.iset.Agent.service.AgentService;
+import com.iset.Agent.service.AgentService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,8 +22,28 @@ public class AgentController {
     // ── CRUD ──────────────────────────────────────────────
 
     @PostMapping
-    public ResponseEntity<AgentResponseDTO> createAgent(@Valid @RequestBody AgentRequestDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(agentService.createAgent(dto));
+    public ResponseEntity<ApiResponse<AgentResponseDTO>> createAgent(
+            @Valid @RequestBody AgentRequestDTO dto) {
+
+        try {
+            AgentResponseDTO agent = agentService.createAgent(dto);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new ApiResponse<>(
+                            true,
+                            "Agent créé avec succès",
+                            agent
+                    ));
+
+        } catch (Exception e) {
+
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>(
+                            false,
+                            e.getMessage(),
+                            null
+                    ));
+        }
     }
 
     @GetMapping
