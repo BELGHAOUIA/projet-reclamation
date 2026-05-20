@@ -21,7 +21,7 @@ class NotificationDetailSerializer(serializers.ModelSerializer):
     et pour les réponses de /send, /read, /retry.
     Tous les champs sont en lecture seule.
     """
-    recipientId    = serializers.UUIDField(source='recipient_id',   read_only=True)
+    recipientId    = serializers.CharField(source='recipient_id',   read_only=True)
     recipientType  = serializers.CharField(source='recipient_type', read_only=True)
     recipientEmail = serializers.CharField(source='recipient_email', read_only=True)
     ticketId       = serializers.UUIDField(source='ticket_id',  read_only=True, allow_null=True)
@@ -60,7 +60,7 @@ class NotificationCreateSerializer(serializers.ModelSerializer):
     recipientName est utilisé pour la substitution dans le template
     (si absent, l'email du destinataire est utilisé à la place).
     """
-    recipientId    = serializers.UUIDField(source='recipient_id')
+    recipientId    = serializers.CharField(source='recipient_id')
     recipientType  = serializers.ChoiceField(
         choices=['CLIENT', 'AGENT', 'ADMIN'],
         source='recipient_type',
@@ -69,6 +69,7 @@ class NotificationCreateSerializer(serializers.ModelSerializer):
         source='recipient_email',
         required=False,
         allow_blank=True,
+        allow_null=True,
         default='',
     )
     ticketId       = serializers.UUIDField(
@@ -81,6 +82,7 @@ class NotificationCreateSerializer(serializers.ModelSerializer):
     recipientName  = serializers.CharField(
         required=False,
         allow_blank=True,
+        allow_null=True,
         default='',
         write_only=True,
     )
@@ -95,6 +97,9 @@ class NotificationCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # recipientName est write_only et n'existe pas sur le modèle
         validated_data.pop('recipientName', None)
+        # Java envoie null pour les champs optionnels non définis — normaliser en ''
+        if validated_data.get('recipient_email') is None:
+            validated_data['recipient_email'] = ''
         return super().create(validated_data)
 
 

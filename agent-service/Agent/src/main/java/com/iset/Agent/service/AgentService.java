@@ -13,6 +13,7 @@ import com.iset.Agent.repository.AgentAssignmentRepository;
 import com.iset.Agent.repository.AgentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -125,58 +126,18 @@ public class AgentService {
     // ── AFFECTATION AUTOMATIQUE ───────────────────────────
 
     @Transactional
-    public AssignmentResponseDTO assignAgent(String ticketId, String priority, String category) {
-        // Étape 1 : trouver specialty selon catégorie
-        AgentSpecialty specialty = mapCategoryToSpecialty(category);
+    public String assignAgent(String ticketId, String agentId) {
 
-        // Étape 2 : selon priorité, chercher senior/expert si HIGH ou CRITICAL
-        List<Agent> candidates;
-        if (priority.equals("HIGH") || priority.equals("CRITICAL")) {
-            candidates = agentRepository.findByStatusAndSpecialtyAndLevel(
-                    AgentStatus.AVAILABLE, specialty, AgentLevel.SENIOR);
-            if (candidates.isEmpty()) {
-                candidates = agentRepository.findByStatusAndSpecialtyAndLevel(
-                        AgentStatus.AVAILABLE, specialty, AgentLevel.EXPERT);
-            }
-        } else {
-            candidates = agentRepository.findByStatusAndSpecialty(AgentStatus.AVAILABLE, specialty);
-        }
-
-        // Étape 3 : fallback — n'importe quel agent disponible
-        if (candidates.isEmpty()) {
-            candidates = agentRepository.findByStatus(AgentStatus.AVAILABLE);
-        }
-        if (candidates.isEmpty()) {
-            throw new RuntimeException("Aucun agent disponible actuellement.");
-        }
-
-        // Étape 4 : choisir le moins chargé
-        Agent selected = candidates.stream()
-                .filter(a -> a.getCurrentTicketCount() < a.getMaxTickets())
-                .min((a, b) -> Integer.compare(a.getCurrentTicketCount(), b.getCurrentTicketCount()))
-                .orElseThrow(() -> new RuntimeException("Tous les agents sont à capacité maximale."));
-
-        // Mise à jour agent
+       Agent selected = agentRepository.findById(agentId).orElseThrow(EntityNotFoundException::new);
         selected.setCurrentTicketCount(selected.getCurrentTicketCount() + 1);
         if (selected.getCurrentTicketCount() >= selected.getMaxTickets()) {
             selected.setStatus(AgentStatus.BUSY);
         }
         agentRepository.save(selected);
 
-        // Créer assignment
-        AgentAssignment assignment = AgentAssignment.builder()
-                .agent(selected)
-                .ticketId(ticketId)
-                .ticketPriority(priority)
-                .ticketCategory(category)
-                .active(true)
-                .build();
-        AgentAssignment saved = assignmentRepository.save(assignment);
-
-        AssignmentResponseDTO response = toAssignmentDTO(saved, selected);
         notificationClient.sendToAdmin("TICKET_ASSIGNED", ticketId);
         notificationClient.sendToAgent(selected.getId(), "TICKET_ASSIGNED", ticketId);
-        return response;
+        return "ok";
     }
 
     @Transactional

@@ -1,0 +1,76 @@
+{
+  "components": [
+    {
+      "label": "Ville",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_wq_city",
+        "columns": null
+      },
+      "id": "Field_wq_city",
+      "key": "city",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Clé API OpenWeatherMap (appid)",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_wq_apikey",
+        "columns": null
+      },
+      "id": "Field_wq_apikey",
+      "key": "apiKey",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Unités de température",
+      "values": [
+        {
+          "label": "Celsius (metric)",
+          "value": "metric"
+        },
+        {
+          "label": "Fahrenheit (imperial)",
+          "value": "imperial"
+        },
+        {
+          "label": "Kelvin (standard)",
+          "value": "standard"
+        }
+      ],
+      "type": "select",
+      "layout": {
+        "row": "Row_wq_units",
+        "columns": null
+      },
+      "id": "Field_wq_units",
+      "key": "units",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Consulter",
+      "action": "submit",
+      "type": "button",
+      "layout": {
+        "row": "Row_wq_submit",
+        "columns": 3
+      },
+      "id": "Field_wq_submit"
+    }
+  ],
+  "type": "default",
+  "id": "form_weather_query.form",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.45.0"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.24.0",
+  "schemaVersion": 19
+}

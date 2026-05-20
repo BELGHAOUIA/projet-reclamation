@@ -30,7 +30,7 @@ class NotificationStatus(models.TextChoices):
 class Notification(models.Model):
 
     id             = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    recipient_id   = models.UUIDField(db_index=True)
+    recipient_id   = models.TextField(db_index=True)
     recipient_type = models.CharField(max_length=10, choices=RecipientType.choices)
     recipient_email = models.CharField(max_length=255, blank=True, default='')
     type           = models.CharField(max_length=30, choices=NotificationType.choices)

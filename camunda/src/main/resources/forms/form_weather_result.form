@@ -1,0 +1,91 @@
+{
+  "components": [
+    {
+      "label": "Ville",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_wres_city",
+        "columns": null
+      },
+      "id": "Field_wres_city",
+      "key": "weatherCity",
+      "readonly": true
+    },
+    {
+      "label": "Pays",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_wres_country",
+        "columns": null
+      },
+      "id": "Field_wres_country",
+      "key": "weatherCountry",
+      "readonly": true
+    },
+    {
+      "label": "Température",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_wres_temp",
+        "columns": null
+      },
+      "id": "Field_wres_temp",
+      "key": "weatherTemp",
+      "readonly": true
+    },
+    {
+      "label": "Ressenti",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_wres_feels",
+        "columns": null
+      },
+      "id": "Field_wres_feels",
+      "key": "weatherFeelsLike",
+      "readonly": true
+    },
+    {
+      "label": "Humidité (%)",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_wres_humidity",
+        "columns": null
+      },
+      "id": "Field_wres_humidity",
+      "key": "weatherHumidity",
+      "readonly": true
+    },
+    {
+      "label": "Vitesse du vent (m/s)",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_wres_wind",
+        "columns": null
+      },
+      "id": "Field_wres_wind",
+      "key": "weatherWindSpeed",
+      "readonly": true
+    },
+    {
+      "label": "Réponse JSON complète",
+      "type": "textarea",
+      "layout": {
+        "row": "Row_wres_raw",
+        "columns": null
+      },
+      "id": "Field_wres_raw",
+      "key": "weatherRawResponse",
+      "readonly": true,
+      "rows": 10
+    }
+  ],
+  "type": "default",
+  "id": "form_weather_result.form",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.45.0"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.24.0",
+  "schemaVersion": 19
+}
